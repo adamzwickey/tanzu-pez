@@ -32,6 +32,7 @@ spec:
               - tkg-extensions/common
               - tkg-extensions/ingress/contour
             inline:
+              inline:
               paths:
                 annotations.yaml: |
                   #@ load("@ytt:overlay", "overlay")
