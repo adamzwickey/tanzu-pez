@@ -1,0 +1,28 @@
+apiVersion: run.tanzu.vmware.com/v1alpha1
+kind: TanzuKubernetesCluster
+metadata:
+ name: {{ .Values.name }}
+ namespace: {{ .Values.namespace }}
+spec:
+ distribution:
+   version: {{ .Values.kubernetesVersion }}
+ topology:
+   controlPlane:
+     count: {{ .Values.controlPlaneCount }} #3 control plane nodes
+     class: {{ .Values.controlPlaneClass }} #large size VM
+     storageClass: {{ .Values.storage }} #Specific storage class for control plane
+   workers:
+     count: {{ .Values.workerCount }} #3 control plane nodes
+     class: {{ .Values.workerClass }} #large size VM
+     storageClass: {{ .Values.storage }} #Specific storage class for control plane
+ settings:
+   network:
+     cni:
+       name: calico
+     services:
+       cidrBlocks: ["198.51.100.0/12"] #Cannot overlap with Supervisor Cluster
+     pods:
+       cidrBlocks: ["192.0.2.0/16"] #Cannot overlap with Supervisor Cluster
+   storage:
+     #classes: ["gold", "silver"] #Named PVC storage classes
+     defaultClass: {{ .Values.storage }}
