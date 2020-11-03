@@ -2,5 +2,5 @@ repoURL: https://gitlab.com/azwickey/tanzu-pez.git
 targetRevision: HEAD
 server: https://kubernetes.api.lb:6443  # This must be overridden
 ingress:
-  ingressFQDN: '*.mgmt.tanzu.zwickey.net'
+  ingressFQDN: '*.tanzu.zwickey.net'
   email: azwickey@vmware.com
