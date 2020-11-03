@@ -37,7 +37,7 @@ kubectl vsphere login -v 8 --server=$SUPERVISOR_VIP \
 kubectl config use-context $SHARED_SERVICES_NS
 kubectl create clusterrolebinding psp:authenticated --clusterrole=psp:vmware-system-privileged --group=system:authenticated
 # Cert Manager and ClusterIssuer
-kubectl apply -f manifests/cert-manager/
+kubectl apply -f cd/apps/extensions-cert-manager
 cp manifests/shared-cluster-issuer-dns.yaml generated/shared/
 yq write generated/shared/shared-cluster-issuer-dns.yaml -i "spec.acme.solvers[0].dns01.route53.region" $(yq r $VARS_YAML aws.region)
 yq write generated/shared/shared-cluster-issuer-dns.yaml -i "spec.acme.solvers[0].dns01.route53.hostedZoneID" $(yq r $VARS_YAML aws.hostedZoneId)
@@ -97,6 +97,14 @@ argocd cluster add $SHARED_SERVICES_NS-argocd-token-user@$SHARED_SERVICES_NS
 argocd cluster list 
 
 # Bootstrap Shared-Services App-of-Apps
+export SERVER=$(argocd cluster list | grep $SHARED_SERVICES_NS-argocd-token-user@$SHARED_SERVICES_NS | awk '{print $1}')
+argocd app create shared-services-app-of-apps \
+  --repo $(yq r $VARS_YAML repo) \
+  --dest-server $SERVER \
+  --dest-namespace default \
+  --sync-policy automated \
+  --path cd/clusters/shared-services \
+  --helm-set server=$SERVER
 
 # Deploy workload clusters
 

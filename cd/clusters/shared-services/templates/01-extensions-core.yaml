@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mgmt-extensions-core
+  name: shared-services-extensions-core
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
@@ -13,6 +13,6 @@ spec:
   syncPolicy:
     automated: {}
   source:
-    path: cd//apps/extensions-core
+    path: cd/apps/extensions-core
     repoURL: {{ .Values.repoURL }}
     targetRevision: {{ .Values.targetRevision }}
