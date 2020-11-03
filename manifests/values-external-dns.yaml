@@ -1,0 +1,7 @@
+provider: aws
+txtOwnerId: xxx
+aws:
+  credentials:
+    accessKey: xxxx
+    secretKey: xxxxx
+  region: xxxx

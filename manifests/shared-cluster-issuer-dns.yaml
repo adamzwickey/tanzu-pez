@@ -1,0 +1,21 @@
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-dns-cluster-issuer
+  namespace: default
+spec:
+  acme:
+    email: "azwickey@vmware.com"
+    privateKeySecretRef:
+      name: acme-account-key
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+    - dns01:
+        route53:
+          region: xxxx
+          hostedZoneID: xxxx
+          accessKeyID: xxxx
+          secretAccessKeySecretRef:
+            name: route53-credentials
+            key: secret-access-key

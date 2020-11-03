@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: contour-data-values
+  namespace: tanzu-system-ingress
+type: Opaque
+stringData:
+  values.yaml: |
+    #@data/values
+    #@overlay/match-child-defaults missing_ok=True
+    ---
+    infrastructure_provider: "aws"
+    envoy:
+      service:
+        type: LoadBalancer

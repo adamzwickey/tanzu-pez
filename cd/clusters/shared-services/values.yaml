@@ -1,0 +1,3 @@
+repoURL: https://gitlab.com/azwickey/tanzu-pez.git
+targetRevision: HEAD
+server: https://kubernetes.api.lb:6443  # This must be overridden
