@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mgmt-extensions-ingress
+  name: shared-services-extensions-ingress
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
