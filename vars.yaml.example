@@ -1,0 +1,45 @@
+repo: https://gitlab.com/azwickey/tanzu-pez.git
+vsphere:
+  host: vcsa-01.haas-439.pez.vmware.com
+  username: administrator@vsphere.local
+  password: xxxxx
+  supervisor-vip: 10.213.147.129
+  clusterName: Cluster
+shared-services:
+  namespace: shared-services
+  name: shared-services
+  storage: cloud-storage
+  kubernetesVersion: v1.18.5 
+  controlPlaneCount: "3"
+  controlPlaneClass: best-effort-medium
+  workerCount: "3"
+  workerClass: best-effort-xlarge
+  argo:
+    password: xxxx
+    ingress: argo.tanzu.zwickey.net
+workload1:
+  namespace: demo
+  name: workload-cluster1
+  kubernetesVersion: v1.18.5 
+  storage: cloud-storage
+  controlPlaneCount: "3"
+  controlPlaneClass: best-effort-medium
+  workerCount: "3"
+  workerClass: best-effort-xlarge
+workload2:
+  namespace: demo
+  name: workload-cluster2
+  kubernetesVersion: v1.18.5 
+  storage: cloud-storage
+  controlPlaneCount: "3"
+  controlPlaneClass: best-effort-medium
+  workerCount: "3"
+  workerClass: best-effort-xlarge
+aws:
+  accessKey: xxxxx
+  secretKey: xxxxx
+  hostedZoneId: xxxxxx
+  region: us-east-2
+tmc:
+  token: xxxx
+  group: demo
