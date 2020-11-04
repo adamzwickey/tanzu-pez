@@ -94,6 +94,7 @@ kubectl config set-context $SHARED_SERVICES_NS-argocd-token-user@$SHARED_SERVICE
   --cluster $(kubectl config get-contexts shared-services --no-headers | awk '{print $3}')
 argocd cluster add #Dump configs
 argocd cluster add $SHARED_SERVICES_NS-argocd-token-user@$SHARED_SERVICES_NS
+argocd cluster add $SUPERVISOR_VIP  #Add Supervisor Cluster
 argocd cluster list 
 
 # Bootstrap Shared-Services App-of-Apps
