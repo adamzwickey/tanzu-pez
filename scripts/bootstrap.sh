@@ -126,7 +126,9 @@ argocd app create shared-services-app-of-apps \
   --dest-namespace default \
   --sync-policy automated \
   --path cd/clusters/shared-services \
-  --helm-set server=$SERVER
+  --helm-set server=$SERVER \
+  --helm-set dex.clientSecret=$(yq r $VARS_YAML dex.clientSecret)
+  
 
 # Deploy workload clusters  TODO -- this needs to go into argoCD
 kubectl config use-context $SUPERVISOR_VIP
