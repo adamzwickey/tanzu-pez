@@ -174,6 +174,7 @@ kubectl vsphere login -v 8 --server=$SUPERVISOR_VIP \
    --insecure-skip-tls-verify \
    -u $SUPERVISOR_USERNAME
 kubectl config use-context $WORKLOAD1_NAME
+kubectl create ns argocd
 kubectl create serviceaccount argocd -n argocd
 kubectl create clusterrolebinding argocd --clusterrole=cluster-admin --serviceaccount=argocd:argocd
 export TOKEN_SECRET=$(kubectl get serviceaccount -n argocd argocd -o jsonpath='{.secrets[0].name}')
@@ -186,14 +187,15 @@ argocd cluster add #Dump configs
 argocd cluster add $WORKLOAD1_NAME-argocd-token-user@$WORKLOAD1_NAME
 argocd cluster list
 
-export WORKLOAD2_NAME=$(yq r $VARS_YAML workload1.name)
-export WORKLOAD2_NAMESPACE=$(yq r $VARS_YAML workload1.namespace)
+export WORKLOAD2_NAME=$(yq r $VARS_YAML workload2.name)
+export WORKLOAD2_NAMESPACE=$(yq r $VARS_YAML workload2.namespace)
 kubectl vsphere login -v 8 --server=$SUPERVISOR_VIP \
    --tanzu-kubernetes-cluster-name $WORKLOAD2_NAME \
    --tanzu-kubernetes-cluster-namespace $WORKLOAD2_NAMESPACE \
    --insecure-skip-tls-verify \
    -u $SUPERVISOR_USERNAME
 kubectl config use-context $WORKLOAD2_NAME
+kubectl create ns argocd
 kubectl create serviceaccount argocd -n argocd
 kubectl create clusterrolebinding argocd --clusterrole=cluster-admin --serviceaccount=argocd:argocd
 export TOKEN_SECRET=$(kubectl get serviceaccount -n argocd argocd -o jsonpath='{.secrets[0].name}')
@@ -207,3 +209,24 @@ argocd cluster add $WORKLOAD2_NAME-argocd-token-user@$WORKLOAD2_NAME
 argocd cluster list
 
 # Bootstrap workloads App-of-Apps
+
+# Add to TMC
+export TMC_API_TOKEN=$(yq r $VARS_YAML tmc.token)
+export TMC_GROUP=$(yq r $VARS_YAML tmc.group)
+kubectl config use-context $SHARED_SERVICES_NAME
+echo TMC_API_TOKEN=$TMC_API_TOKEN
+echo TMC_GROUP=$TMC_GROUP
+tmc login --no-configure --name temp
+tmc cluster attach -g $TMC_GROUP -n $SHARED_SERVICES_NAME -o generated/shared/tmc.yaml --management-cluster-name attached --provisioner-name attached
+kubectl apply -f generated/shared/tmc.yaml
+kubectl config use-context $WORKLOAD1_NAME
+echo TMC_API_TOKEN=$TMC_API_TOKEN
+echo TMC_GROUP=$TMC_GROUP
+tmc login --no-configure --name temp
+tmc cluster attach -g $TMC_GROUP -n $WORKLOAD1_NAME -o generated/workload1/tmc.yaml --management-cluster-name attached --provisioner-name attached
+kubectl apply -f generated/workload1/tmc.yaml
+kubectl config use-context $WORKLOAD2_NAME
+tmc login --no-configure --name temp
+tmc cluster attach -g $TMC_GROUP -n $WORKLOAD2_NAME -o generated/workload2/tmc.yaml --management-cluster-name attached --provisioner-name attached
+kubectl apply -f generated/workload2/tmc.yaml
+
