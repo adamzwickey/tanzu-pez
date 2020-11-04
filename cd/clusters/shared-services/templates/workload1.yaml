@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: workload-cluster-1
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: default
+    server: {{ .Values.server }}
+  project: default
+  syncPolicy:
+    automated: {}
+  source:
+    path: cd/apps/workload-cluster
+    repoURL: {{ .Values.repoURL }}
+    targetRevision: {{ .Values.targetRevision }}
+    helm:
+      parameters:
+        - name: name
+          value: {{ .Values.workload1.name }}
+        - name: namespace
+          value: {{ .Values.workload1.namespace }}
+        - name: kubernetesVersion
+          value: {{ .Values.workload1.kubernetesVersion }}
+        - name: storage
+          value: {{ .Values.workload1.storage }}
+        - name: controlPlaneCount
+          value: {{ .Values.workload1.controlPlaneCount }}
+        - name: controlPlaneClass
+          value: {{ .Values.workload1.controlPlaneClass }}
+        - name: workerCount
+          value: {{ .Values.workload1.workerCount }}
+        - name: workerClass
+          value: {{ .Values.workload1.workerClass }}
