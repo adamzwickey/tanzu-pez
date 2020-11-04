@@ -12,7 +12,7 @@ workload1:
   namespace: demo
   kubernetesVersion: v1.18.5
   storage: cloud-storage
-  controlPlaneCount: 1
+  controlPlaneCount: "1"
   controlPlaneClass: best-effort-medium
-  workerCount: 1
+  workerCount: "1"
   workerClass: best-effort-xlarge
