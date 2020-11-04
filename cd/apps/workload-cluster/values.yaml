@@ -2,7 +2,7 @@ name: workload-cluster
 namespace: demo
 kubernetesVersion:
 storage: storage-policy-k8s
-controlPlaneCount: 1
+controlPlaneCount: "1"
 controlPlaneClass: small
-workerCount: 1
+workerCount: "1"
 workerClass: small
