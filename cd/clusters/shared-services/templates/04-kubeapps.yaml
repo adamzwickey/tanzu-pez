@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shared-services-kubeapps
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: kubeapps
+    server: {{ .Values.server }}
+  project: default
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated: {}
+  source:
+    repoURL: 'https://charts.trials.tac.bitnami.com/demo'
+    chart: kubeapps
+    targetRevision: 4.0.2
+    helm:
+      parameters:
+      - name: ingress.certManager
+        value: 'true'
+      - name: ingress.enabled
+        value: 'true'
+      - name: ingress.hostname
+        value: {{ .Values.kubeapps.domain }}
+      - name: ingress.tls
+        value: 'true'

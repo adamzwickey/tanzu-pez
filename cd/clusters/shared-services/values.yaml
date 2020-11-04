@@ -7,3 +7,5 @@ ingress:
 harbor:
   domain: registry.tanzu.zwickey.net
   pwd: VMware1! # This must be overridden
+kubeapps:
+  domain: catalog.tanzu.zwickey.net
