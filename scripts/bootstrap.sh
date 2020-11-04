@@ -94,7 +94,7 @@ kubectl config set-context $SHARED_SERVICES_NS-argocd-token-user@$SHARED_SERVICE
   --cluster $(kubectl config get-contexts shared-services --no-headers | awk '{print $3}')
 argocd cluster add #Dump configs
 argocd cluster add $SHARED_SERVICES_NS-argocd-token-user@$SHARED_SERVICES_NS
-argocd cluster add $SUPERVISOR_VIP  #Add Supervisor Cluster
+#argocd cluster add $SUPERVISOR_VIP  #Add Supervisor Cluster
 argocd cluster list 
 
 # Bootstrap Shared-Services App-of-Apps
@@ -107,6 +107,43 @@ argocd app create shared-services-app-of-apps \
   --path cd/clusters/shared-services \
   --helm-set server=$SERVER
 
-# Deploy workload clusters
+# Deploy workload clusters  TODO -- this needs to go into argoCD
+kubectl config use-context $SUPERVISOR_VIP
+mkdir -p generated/supervisor
+cp cd/apps/workload-cluster/values.yaml generated/supervisor/workload1.yaml
+cp cd/apps/workload-cluster/values.yaml generated/supervisor/workload2.yaml
+# Workload 1
+yq write generated/supervisor/workload1.yaml -i "name" $(yq r $VARS_YAML workload1.name)
+yq write generated/supervisor/workload1.yaml -i "namespace" $(yq r $VARS_YAML workload1.namespace)
+yq write generated/supervisor/workload1.yaml -i "kubernetesVersion" $(yq r $VARS_YAML workload1.kubernetesVersion)
+yq write generated/supervisor/workload1.yaml -i "storage" $(yq r $VARS_YAML workload1.storage)
+yq write generated/supervisor/workload1.yaml -i "controlPlaneCount" $(yq r $VARS_YAML workload1.controlPlaneCount)
+yq write generated/supervisor/workload1.yaml -i "controlPlaneClass" $(yq r $VARS_YAML workload1.controlPlaneClass)
+yq write generated/supervisor/workload1.yaml -i "workerCount" $(yq r $VARS_YAML workload1.workerCount)
+yq write generated/supervisor/workload1.yaml -i "workerClass" $(yq r $VARS_YAML workload1.workerClass)
+helm install $(yq r $VARS_YAML workload1.name) cd/apps/workload-cluster/ --namespace $(yq r $VARS_YAML workload1.namespace) -f generated/supervisor/workload1.yaml
+# Workload 2
+yq write generated/supervisor/workload2.yaml -i "name" $(yq r $VARS_YAML workload2.name)
+yq write generated/supervisor/workload2.yaml -i "namespace" $(yq r $VARS_YAML workload2.namespace)
+yq write generated/supervisor/workload2.yaml -i "kubernetesVersion" $(yq r $VARS_YAML workload2.kubernetesVersion)
+yq write generated/supervisor/workload2.yaml -i "storage" $(yq r $VARS_YAML workload2.storage)
+yq write generated/supervisor/workload2.yaml -i "controlPlaneCount" $(yq r $VARS_YAML workload2.controlPlaneCount)
+yq write generated/supervisor/workload2.yaml -i "controlPlaneClass" $(yq r $VARS_YAML workload2.controlPlaneClass)
+yq write generated/supervisor/workload2.yaml -i "workerCount" $(yq r $VARS_YAML workload2.workerCount)
+yq write generated/supervisor/workload2.yaml -i "workerClass" $(yq r $VARS_YAML workload2.workerClass)
+helm install $(yq r $VARS_YAML workload2.name) cd/apps/workload-cluster/ --namespace $(yq r $VARS_YAML workload2.namespace) -f generated/supervisor/workload2.yaml
+sleep 10
 
-# Bootstrap workload App-of-Apps
+while kubectl get tanzukubernetesclusters $(yq r $VARS_YAML workload1.name) -n $(yq r $VARS_YAML workload1.namespace) | grep running ; [ $? -ne 0 ]; do
+	echo $(yq r $VARS_YAML workload1.name) Cluster is not Running...
+	sleep 5s
+done
+
+while kubectl get tanzukubernetesclusters $(yq r $VARS_YAML workload2.name) -n $(yq r $VARS_YAML workload2.namespace) | grep running ; [ $? -ne 0 ]; do
+	echo $(yq r $VARS_YAML workload2.name) Cluster is not Running...
+	sleep 5s
+done
+
+#Add Workloads to ArgoCD
+
+# Bootstrap workloads App-of-Apps
