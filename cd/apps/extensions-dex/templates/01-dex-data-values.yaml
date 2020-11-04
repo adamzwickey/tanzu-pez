@@ -30,7 +30,7 @@ stringData:
         staticClients:
         - id: kubeapps
           redirectURIs:
-          - 'http://catalog.tanzu.zwickey.net/oauth2/callback'
+          - 'https://catalog.tanzu.zwickey.net/oauth2/callback'
           name: kubeapps
           secret: 4715bb03d521d0ca0b2a32ba8c797e1b
     #! Deploy dex first and update sample-elb with real name once dex service loadbalancer is created, dnsNames is optional.
