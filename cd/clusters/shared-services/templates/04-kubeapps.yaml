@@ -20,6 +20,8 @@ spec:
     targetRevision: 4.0.2
     helm:
       parameters:
+      - name: useHelm3
+        value: 'true'
       - name: ingress.certManager
         value: 'true'
       - name: ingress.enabled
