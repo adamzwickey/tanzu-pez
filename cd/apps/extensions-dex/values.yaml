@@ -1,0 +1,4 @@
+clientId: 1234
+clientSecret: topSecret
+ingressFQDN: example.com
+idpUrl: https://idp.com

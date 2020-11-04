@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: dex-ingress
+  namespace: tanzu-system-auth
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-contour-cluster-issuer"
+    external-dns.alpha.kubernetes.io/hostname: "{{ .Values.ingressFQDN }}."
+spec:
+  tls:
+  - secretName: dex-https-secret
+    hosts:
+      - {{ .Values.ingressFQDN }}
+  rules:
+  - host: {{ .Values.ingressFQDN }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: dex-http
+          servicePort: 5555

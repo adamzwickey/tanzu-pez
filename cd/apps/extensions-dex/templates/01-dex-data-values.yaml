@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dex-data-values
+  namespace: tanzu-system-auth
+type: Opaque
+stringData:
+  values.yaml: |
+    #@data/values
+    #@overlay/match-child-defaults missing_ok=True
+    ---
+    infrastructure_provider: "aws"
+    dex:
+      service:
+        type: NodePort
+      config:
+        web:
+          http: 0.0.0.0:5555
+        connector: oidc
+        oidc:
+          CLIENT_ID: {{ .Values.clientId }}
+          CLIENT_SECRET: {{ .Values.clientSecret }}
+          issuer: {{ .Values.idpUrl }}
+          insecureEnableGroups: true
+          getUserInfo: true
+          #@overlay/replace
+          scopes: ["profile", "email", "groups"]
+        #! Deploy dex first with dummy staticClients. Once gangway is installed in workload cluster, update static clients with gangway information
+        #@overlay/replace
+        staticClients:
+        - id: kubeapps
+          redirectURIs:
+          - 'https://catalog.tanzu.zwickey.net/oauth2/callback'
+          name: kubeapps
+          secret: 4715bb03d521d0ca0b2a32ba8c797e1b
+    #! Deploy dex first and update sample-elb with real name once dex service loadbalancer is created, dnsNames is optional.
+    dns:
+      aws:
+        DEX_SVC_LB_HOSTNAME: {{ .Values.ingressFQDN }}
+        dnsNames: []

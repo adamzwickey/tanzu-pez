@@ -1,0 +1,15 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: dex-http
+  namespace: tanzu-system-auth
+spec:
+  type: ClusterIP
+  ports:
+    - name: "dex"
+      protocol: TCP
+      port: 5555
+      targetPort: "http"
+  selector:
+    app: dex

@@ -13,7 +13,7 @@ spec:
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
-    automated: {}
+    #automated: {}
   source:
     repoURL: 'https://charts.trials.tac.bitnami.com/demo'
     chart: kubeapps
