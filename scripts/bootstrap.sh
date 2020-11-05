@@ -251,3 +251,26 @@ tmc login --no-configure --name temp
 tmc cluster attach -g $TMC_GROUP -n $WORKLOAD2_NAME -o generated/workload2/tmc.yaml --management-cluster-name attached --provisioner-name attached
 kubectl apply -f generated/workload2/tmc.yaml
 
+cp manifests/shared-cluster-issuer-dns.yaml generated/workload1/cluster-issuer-dns.yaml
+yq write generated/workload1/cluster-issuer-dns.yaml -i "spec.acme.solvers[0].dns01.route53.region" $(yq r $VARS_YAML aws.region)
+yq write generated/workload1/cluster-issuer-dns.yaml -i "spec.acme.solvers[0].dns01.route53.hostedZoneID" $(yq r $VARS_YAML aws.hostedZoneId)
+yq write generated/workload1/cluster-issuer-dns.yaml -i "spec.acme.solvers[0].dns01.route53.accessKeyID" $(yq r $VARS_YAML aws.accessKey)
+kubectl config use-context $WORKLOAD1_NAME
+while kubectl get po -n cert-manager | grep Running | wc -l | grep 3 ; [ $? -ne 0 ]; do
+    echo Cert Manager is not yet ready
+    sleep 5s
+done
+kubectl create secret generic route53-credentials --from-literal=secret-access-key=$(yq r $VARS_YAML aws.secretKey) -n cert-manager
+kubectl apply -f generated/workload1/cluster-issuer-dns.yaml
+
+cp manifests/shared-cluster-issuer-dns.yaml generated/workload2/cluster-issuer-dns.yaml
+yq write generated/workload2/cluster-issuer-dns.yaml -i "spec.acme.solvers[0].dns01.route53.region" $(yq r $VARS_YAML aws.region)
+yq write generated/workload2/cluster-issuer-dns.yaml -i "spec.acme.solvers[0].dns01.route53.hostedZoneID" $(yq r $VARS_YAML aws.hostedZoneId)
+yq write generated/workload2/cluster-issuer-dns.yaml -i "spec.acme.solvers[0].dns01.route53.accessKeyID" $(yq r $VARS_YAML aws.accessKey)
+kubectl config use-context $WORKLOAD2_NAME
+while kubectl get po -n cert-manager | grep Running | wc -l | grep 3 ; [ $? -ne 0 ]; do
+    echo Cert Manager is not yet ready
+    sleep 5s
+done
+kubectl create secret generic route53-credentials --from-literal=secret-access-key=$(yq r $VARS_YAML aws.secretKey) -n cert-manager
+kubectl apply -f generated/workload2/cluster-issuer-dns.yaml
