@@ -211,6 +211,14 @@ argocd cluster add $WORKLOAD2_NAME-argocd-token-user@$WORKLOAD2_NAME
 argocd cluster list
 
 # Bootstrap workloads App-of-Apps
+export WORKLOAD1_SERVER=$(argocd cluster list | grep $WORKLOAD1_NAME-argocd-token-user@$WORKLOAD1_NAME | awk '{print $1}')
+argocd app create $WORKLOAD1_NAME-app-of-apps \
+  --repo $(yq r $VARS_YAML repo) \
+  --dest-server $WORKLOAD1_SERVER \
+  --dest-namespace default \
+  --sync-policy automated \
+  --path cd/clusters/workload1 \
+  --helm-set server=$WORKLOAD1_SERVER
 
 # Add to TMC
 export TMC_API_TOKEN=$(yq r $VARS_YAML tmc.token)
