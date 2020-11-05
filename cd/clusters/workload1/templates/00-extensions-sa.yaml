@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: workload1-extensions-cert-manager
+  name: workload1-extensions-sa
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
