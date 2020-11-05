@@ -6,7 +6,11 @@ export SUPERVISOR_VIP=$(yq r $VARS_YAML vsphere.supervisor-vip)
 export SUPERVISOR_USERNAME=$(yq r $VARS_YAML vsphere.username)
 export SUPERVISOR_PWD=$(yq r $VARS_YAML vsphere.password)
 export VCSA=$(yq r $VARS_YAML vsphere.host)
-kubectl vsphere login -v 8 --server=$SUPERVISOR_VIP --insecure-skip-tls-verify -u $SUPERVISOR_USERNAME
+echo $(yq r $VARS_YAML vsphere.password) | pbcopy
+echo "*************************"
+echo "vSphere to clipboard.  cntrl+C when prompted for pwd"
+echo "*************************"
+kubectl vsphere login -v 4 --server=$SUPERVISOR_VIP --insecure-skip-tls-verify -u $SUPERVISOR_USERNAME
 
 # Create Namespaces
 python ./scripts/create-namespace.py -s $VCSA -u $SUPERVISOR_USERNAME -p $SUPERVISOR_PWD \
@@ -42,7 +46,7 @@ while kubectl get tanzukubernetesclusters $SHARED_SERVICES_NAME -n $SHARED_SERVI
 	sleep 5s
 done
 
-kubectl vsphere login -v 8 --server=$SUPERVISOR_VIP \
+kubectl vsphere login -v 4 --server=$SUPERVISOR_VIP \
    --tanzu-kubernetes-cluster-name $SHARED_SERVICES_NAME \
    --tanzu-kubernetes-cluster-namespace $SHARED_SERVICES_NS \
    --insecure-skip-tls-verify \
@@ -170,7 +174,7 @@ done
 #Add Workloads to ArgoCD
 export WORKLOAD1_NAME=$(yq r $VARS_YAML workload1.name)
 export WORKLOAD1_NAMESPACE=$(yq r $VARS_YAML workload1.namespace)
-kubectl vsphere login -v 8 --server=$SUPERVISOR_VIP \
+kubectl vsphere login -v 4 --server=$SUPERVISOR_VIP \
    --tanzu-kubernetes-cluster-name $WORKLOAD1_NAME \
    --tanzu-kubernetes-cluster-namespace $WORKLOAD1_NAMESPACE \
    --insecure-skip-tls-verify \
@@ -191,7 +195,7 @@ argocd cluster list
 
 export WORKLOAD2_NAME=$(yq r $VARS_YAML workload2.name)
 export WORKLOAD2_NAMESPACE=$(yq r $VARS_YAML workload2.namespace)
-kubectl vsphere login -v 8 --server=$SUPERVISOR_VIP \
+kubectl vsphere login -v 4 --server=$SUPERVISOR_VIP \
    --tanzu-kubernetes-cluster-name $WORKLOAD2_NAME \
    --tanzu-kubernetes-cluster-namespace $WORKLOAD2_NAMESPACE \
    --insecure-skip-tls-verify \
@@ -298,13 +302,25 @@ ytt -f temp/values.yaml -f temp/manifests/ \
     -v docker_password="$HARBOR_PWD" \
     | kbld -f temp/images-relocated.lock -f- \
     | kapp deploy -a tanzu-build-service -f- -y
-kp import -f temp/$(yq r $VARS_YAML tbs.descriptor)
-echo "*** When prompted enter harbor pwd***"
+# This step takes a long time when on the VPN so we'll try it on jumpbox
+echo $(yq r $VARS_YAML vsphere.password) | pbcopy
+echo "*************************"
+echo "jumpbox copied to clipboard.  cntrl+C when prompted for pwd"
+echo "*************************"
+scp temp/$(yq r $VARS_YAML tbs.descriptor) ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~
+scp temp/kp-linux-0.1.3 ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~/kp
+kubectl config use-context $SHARED_SERVICES_NAME;
+kubectl config view --raw > /tmp/kubeconfig
+scp /tmp/kubeconfig ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~
+ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) docker login registry.pivotal.io -u $(yq r $VARS_YAML tbs.network.user) -p $(yq r $VARS_YAML tbs.network.pwd)
+ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) docker login $HARBOR_DOMAIN -u admin -p $HARBOR_PWD
+ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) KUBECONFIG=kubeconfig ./kp import -f $(yq r $VARS_YAML tbs.descriptor)
+echo "*** When prompted enter harbor pwd ***"
 kp secret create harbor-secret --registry $HARBOR_DOMAIN --registry-user admin
 
 #Create a test image just to make sure we're working
 kp image create test --tag $HARBOR_DOMAIN/library/test --git https://github.com/adamzwickey/fortune-demo
 sleep 3
 kp image list
-sleep 3
+sleep 10
 kp build logs test
