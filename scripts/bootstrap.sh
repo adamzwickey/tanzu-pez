@@ -298,3 +298,4 @@ ytt -f temp/values.yaml -f temp/manifests/ \
     -v docker_password="$HARBOR_PWD" \
     | kbld -f temp/images-relocated.lock -f- \
     | kapp deploy -a tanzu-build-service -f- -y
+kp import -f temp/$(yq r $VARS_YAML tbs.descriptor)
