@@ -274,3 +274,27 @@ while kubectl get po -n cert-manager | grep Running | wc -l | grep 3 ; [ $? -ne 
 done
 kubectl create secret generic route53-credentials --from-literal=secret-access-key=$(yq r $VARS_YAML aws.secretKey) -n cert-manager
 kubectl apply -f generated/workload2/cluster-issuer-dns.yaml
+
+#Install Build Service on Shared Services
+kubectl config use-context $SHARED_SERVICES_NAME
+tar xvf temp/build-service-$(yq r $VARS_YAML tbs.version).tar -C temp/
+#login to harbor and login to pvtl registry
+export HARBOR_DOMAIN=$(yq r cd/clusters/shared-services/values.yaml harbor.domain)
+export HARBOR_PWD=$(yq r cd/clusters/shared-services/values.yaml harbor.pwd)
+docker login $HARBOR_DOMAIN -u admin -p $HARBOR_PWD
+docker login registry.pivotal.io \
+       -u $(yq r $VARS_YAML tbs.network.user) -p $(yq r $VARS_YAML tbs.network.pwd) 
+# Create the project
+curl -X POST "https://registry.tanzu.zwickey.net/api/v2.0/projects" -H "accept: application/json" \
+  -u admin:$HARBOR_PWD -H "Content-Type: application/json" \
+  -d "{ \"count_limit\": -1, \"project_name\": \"tbs\", \"cve_whitelist\": {}, \"storage_limit\": -1, \"metadata\": { \"enable_content_trust\": \"false\", \"auto_scan\": \"true\", \"public\": \"false\" }}"
+curl -L -ik -u admin:$HARBOR_PWD -H "Content-Type: application/json" https://$HARBOR_DOMAIN/api/v2.0/projects
+# Install TBS
+kbld relocate -f temp/images.lock --lock-output temp/images-relocated.lock \
+  --repository $HARBOR_DOMAIN/tbs/build-service
+ytt -f temp/values.yaml -f temp/manifests/ \
+    -v docker_repository="$HARBOR_DOMAIN/tbs/build-service" \
+    -v docker_username="admin" \
+    -v docker_password="$HARBOR_PWD" \
+    | kbld -f temp/images-relocated.lock -f- \
+    | kapp deploy -a tanzu-build-service -f- -y
