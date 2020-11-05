@@ -15,7 +15,7 @@ spec:
   source:
     repoURL: 'https://charts.trials.tac.bitnami.com/demo'
     chart: external-dns
-    targetRevision: 0.7.4
+    targetRevision: 3.6.0
     helm:
       parameters:
         - name: aws.credentials.secretKey
