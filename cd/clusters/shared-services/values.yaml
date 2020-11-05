@@ -1,4 +1,5 @@
 repoURL: https://gitlab.com/azwickey/tanzu-pez.git
+todosRepo: https://gitlab.com/azwickey/todos.git
 targetRevision: HEAD
 server: https://kubernetes.api.lb:6443  # This must be overridden
 ingress:

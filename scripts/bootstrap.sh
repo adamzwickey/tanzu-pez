@@ -299,3 +299,12 @@ ytt -f temp/values.yaml -f temp/manifests/ \
     | kbld -f temp/images-relocated.lock -f- \
     | kapp deploy -a tanzu-build-service -f- -y
 kp import -f temp/$(yq r $VARS_YAML tbs.descriptor)
+echo "*** When prompted enter harbor pwd***"
+kp secret create harbor-secret --registry $HARBOR_DOMAIN --registry-user admin
+
+#Create a test image just to make sure we're working
+kp image create test --tag $HARBOR_DOMAIN/library/test --git https://github.com/adamzwickey/fortune-demo
+sleep 3
+kp image list
+sleep 3
+kp build logs test
