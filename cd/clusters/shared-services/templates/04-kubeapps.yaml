@@ -28,8 +28,8 @@ spec:
         value: {{ .Values.kubeapps.domain }}
       - name: ingress.tls
         value: 'true'
-      - name: ingress.annotations
-        value: 'kubernetes.io/ingress.class: contour'
+      # - name: ingress.annotations
+      #   value: 'kubernetes.io/ingress.class: contour'
 
 
 
