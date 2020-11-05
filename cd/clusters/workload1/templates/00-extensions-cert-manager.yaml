@@ -13,6 +13,6 @@ spec:
   syncPolicy:
     automated: {}
   source:
-    path: cd/argo/apps/extensions-cert-manager
+    path: cd/apps/extensions-cert-manager
     repoURL: {{ .Values.repoURL }}
     targetRevision: {{ .Values.targetRevision }}
