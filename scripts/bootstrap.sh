@@ -218,7 +218,8 @@ argocd app create $WORKLOAD1_NAME-app-of-apps \
   --dest-namespace default \
   --sync-policy automated \
   --path cd/clusters/workload1 \
-  --helm-set server=$WORKLOAD1_SERVER
+  --helm-set server=$WORKLOAD1_SERVER \
+  --helm-set aws.credentials.secretKey=$(yq r $VARS_YAML aws.secretKey)
 
 export WORKLOAD2_SERVER=$(argocd cluster list | grep $WORKLOAD2_NAME-argocd-token-user@$WORKLOAD2_NAME | awk '{print $1}')
 argocd app create $WORKLOAD2_NAME-app-of-apps \
@@ -227,7 +228,8 @@ argocd app create $WORKLOAD2_NAME-app-of-apps \
   --dest-namespace default \
   --sync-policy automated \
   --path cd/clusters/workload2 \
-  --helm-set server=$WORKLOAD2_SERVER
+  --helm-set server=$WORKLOAD2_SERVER \
+  --helm-set aws.credentials.secretKey=$(yq r $VARS_YAML aws.secretKey)
 
 # Add to TMC
 export TMC_API_TOKEN=$(yq r $VARS_YAML tmc.token)

@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: workload1-external-dns
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: default
+    server: {{ .Values.server }}
+  project: default
+  syncPolicy:
+    automated: {}
+  source:
+    repoURL: 'https://charts.trials.tac.bitnami.com/demo'
+    chart: external-dns
+    targetRevision: {{ .Values.targetRevision }}
+    helm:
+      parameters:
+        - name: aws.credentials.secretKey
+          value: {{ .Values.aws.credentials.secretKey }}
+        - name: aws.credentials.accessKey
+          value: {{ .Values.aws.credentials.accessKey }}
+        - name: aws.region
+          value: {{ .Values.aws.region }}
+        - name: txtOwnerId
+          value: {{ .Values.aws.txtOwnerId }}

@@ -6,3 +6,9 @@ ingress:
   email: azwickey@vmware.com
 kubeapps:
   domain: catalog.workload2.tanzu.zwickey.net
+aws:
+  credentials:
+    accessKey: AKIAJJLAD2LEFJJIEOBA
+    secretKey: abc12345 # This must be overridden (or changed later in UI)
+  region: us-east-2
+  txtOwnerId: Z10216462Y3G2KQ1H8ATW
