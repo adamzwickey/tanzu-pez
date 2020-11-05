@@ -28,8 +28,9 @@ spec:
         value: {{ .Values.kubeapps.domain }}
       - name: ingress.tls
         value: 'true'
-      - name: ingress.annotations.nginx.ingress.kubernetes.io/proxy-read-timeout
-        value: '500'
+      - name: "ingress.annotations.kubernetes\\.io/ssl-redirect"
+        value: "true"
+        forceString: true
 
 
 
