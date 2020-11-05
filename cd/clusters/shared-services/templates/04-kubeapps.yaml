@@ -28,7 +28,7 @@ spec:
         value: {{ .Values.kubeapps.domain }}
       - name: ingress.tls
         value: 'true'
-      - name: ingress.annotations."[kubernetes.io/ingress.class]"
+      - name: ingress.annotations.kubernetes\.io/ingress.class
         value: 'bar'
 
 
