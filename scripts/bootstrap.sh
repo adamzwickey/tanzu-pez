@@ -342,65 +342,68 @@ curl -X POST "https://$HARBOR_DOMAIN/api/v2.0/projects" -H "accept: application/
   -u admin:$HARBOR_PWD -H "Content-Type: application/json" \
   -d "{ \"count_limit\": -1, \"project_name\": \"tbs\", \"cve_whitelist\": {}, \"storage_limit\": -1, \"metadata\": { \"enable_content_trust\": \"false\", \"auto_scan\": \"true\", \"public\": \"false\" }}"
 curl -L -ik -u admin:$HARBOR_PWD -H "Content-Type: application/json" https://$HARBOR_DOMAIN/api/v2.0/projects
+# Flip flag to always scan default project
+curl -X PUT "https://$HARBOR_DOMAIN/api/v2.0/projects/1" -H "accept: application/json" \
+  -u admin:$HARBOR_PWD -H "Content-Type: application/json" \
+  -d "{ \"metadata\": { \"auto_scan\": \"true\" }}"
 # Install TBS
-kbld relocate -f temp/images.lock --lock-output temp/images-relocated.lock \
-  --repository $HARBOR_DOMAIN/tbs/build-service
-ytt -f temp/values.yaml -f temp/manifests/ \
-    -v docker_repository="$HARBOR_DOMAIN/tbs/build-service" \
-    -v docker_username="admin" \
-    -v docker_password="$HARBOR_PWD" \
-    | kbld -f temp/images-relocated.lock -f- \
-    | kapp deploy -a tanzu-build-service -f- -y
-# This step takes a long time when on the VPN so we'll try it on jumpbox
-expect <<EOD
-spawn scp temp/$(yq r $VARS_YAML tbs.descriptor) ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~
-expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
-send "$(yq r $VARS_YAML vsphere.password)\n"
-expect
-EOD
-expect <<EOD
-spawn scp temp/kp-linux-0.1.3 ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~/kp
-expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
-send "$(yq r $VARS_YAML vsphere.password)\n"
-expect
-EOD
-kubectl config use-context $SHARED_SERVICES_NAME;
-kubectl config view --raw > /tmp/kubeconfig
-expect <<EOD
-spawn scp /tmp/kubeconfig ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~
-expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
-send "$(yq r $VARS_YAML vsphere.password)\n"
-expect
-EOD
-expect <<EOD
-spawn ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) docker login registry.pivotal.io -u $(yq r $VARS_YAML tbs.network.user) -p $(yq r $VARS_YAML tbs.network.pwd)
-expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
-send "$(yq r $VARS_YAML vsphere.password)\n"
-expect
-EOD
-expect <<EOD
-spawn ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) docker login $HARBOR_DOMAIN -u admin -p $HARBOR_PWD
-expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
-send "$(yq r $VARS_YAML vsphere.password)\n"
-expect
-EOD
-expect <<EOD
-spawn ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) KUBECONFIG=kubeconfig ./kp import -f $(yq r $VARS_YAML tbs.descriptor)
-expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
-send "$(yq r $VARS_YAML vsphere.password)\n"
-expect
-EOD
+# kbld relocate -f temp/images.lock --lock-output temp/images-relocated.lock \
+#   --repository $HARBOR_DOMAIN/tbs/build-service
+# ytt -f temp/values.yaml -f temp/manifests/ \
+#     -v docker_repository="$HARBOR_DOMAIN/tbs/build-service" \
+#     -v docker_username="admin" \
+#     -v docker_password="$HARBOR_PWD" \
+#     | kbld -f temp/images-relocated.lock -f- \
+#     | kapp deploy -a tanzu-build-service -f- -y
+# # This step takes a long time when on the VPN so we'll try it on jumpbox
+# expect <<EOD
+# spawn scp temp/$(yq r $VARS_YAML tbs.descriptor) ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~
+# expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
+# send "$(yq r $VARS_YAML vsphere.password)\n"
+# expect
+# EOD
+# expect <<EOD
+# spawn scp temp/kp-linux-0.1.3 ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~/kp
+# expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
+# send "$(yq r $VARS_YAML vsphere.password)\n"
+# expect
+# EOD
+# kubectl config use-context $SHARED_SERVICES_NAME;
+# kubectl config view --raw > /tmp/kubeconfig
+# expect <<EOD
+# spawn scp /tmp/kubeconfig ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~
+# expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
+# send "$(yq r $VARS_YAML vsphere.password)\n"
+# expect
+# EOD
+# expect <<EOD
+# spawn ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) docker login registry.pivotal.io -u $(yq r $VARS_YAML tbs.network.user) -p $(yq r $VARS_YAML tbs.network.pwd)
+# expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
+# send "$(yq r $VARS_YAML vsphere.password)\n"
+# expect
+# EOD
+# expect <<EOD
+# spawn ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) docker login $HARBOR_DOMAIN -u admin -p $HARBOR_PWD
+# expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
+# send "$(yq r $VARS_YAML vsphere.password)\n"
+# expect
+# EOD
+# expect <<EOD
+# set timeout 600
+# spawn ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) KUBECONFIG=kubeconfig ./kp import -f $(yq r $VARS_YAML tbs.descriptor)
+# expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
+# send "$(yq r $VARS_YAML vsphere.password)\n"
+# expect
+# EOD
 
-expect <<EOD
-spawn kp secret create harbor-secret --registry $HARBOR_DOMAIN --registry-user admin
-expect "registry password: "
-send "$HARBOR_PWD\n"
-expect
-EOD
+# expect <<EOD
+# spawn kp secret create harbor-secret --registry $HARBOR_DOMAIN --registry-user admin
+# expect "registry password: "
+# send "$HARBOR_PWD\n"
+# expect
+# EOD
 
-#Create a test image just to make sure we're working
-kp image create test --tag $HARBOR_DOMAIN/library/test --git https://github.com/adamzwickey/fortune-demo
-sleep 3
-kp image list
-sleep 10
-kp build logs test
+# #Create a test image just to make sure we're working
+# kp image create test --tag $HARBOR_DOMAIN/library/test-app \
+#     --git https://github.com/buildpacks/samples \
+#     --sub-path ./apps/java-maven --wait
