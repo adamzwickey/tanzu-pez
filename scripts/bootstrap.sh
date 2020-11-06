@@ -155,6 +155,8 @@ argocd app create shared-services-app-of-apps \
   --sync-policy automated \
   --path cd/clusters/shared-services \
   --helm-set server=$SERVER \
+  --helm-set harbor.pwd=$(yq r $VARS_YAML shared-services.harbor.pwd) \
+  --helm-set grafana.pwd=$(yq r $VARS_YAML shared-services.grafana.pwd) \
   --helm-set dex.clientSecret=$(yq r $VARS_YAML dex.clientSecret)
   
 

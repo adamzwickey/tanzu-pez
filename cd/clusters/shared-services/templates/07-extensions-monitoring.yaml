@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shared-services-extensions-monitoring
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: default
+    server: {{ .Values.server }}
+  project: default
+  syncPolicy:
+    automated: {}
+  source:
+    path: cd/apps/extensions-monitoring
+    repoURL: {{ .Values.repoURL }}
+    targetRevision: {{ .Values.targetRevision }}
+    helm:
+      parameters:
+        - name: prometheus.ingressFQDN
+          value: "{{ .Values.prometheus.ingressFQDN }}"
+        - name: grafana.ingressFQDN
+          value: "{{ .Values.grafana.ingressFQDN }}"
+        - name: grafana.pwd
+          value: "{{ .Values.grafana.pwd }}"

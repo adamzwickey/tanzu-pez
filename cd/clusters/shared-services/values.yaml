@@ -7,7 +7,12 @@ ingress:
   email: azwickey@vmware.com
 harbor:
   domain: registry.private.tanzu.zwickey.net
-  pwd: VMware1! # This must be overridden
+  pwd: topSecret # This must be overridden
+prometheus:
+  ingressFQDN: prometheus.private.tanzu.zwickey.net
+grafana:
+  ingressFQDN: grafana.private.tanzu.zwickey.net
+  pwd: topSecret # This must be overridden
 kubeapps:
   domain: catalog.private.tanzu.zwickey.net
 dex:
