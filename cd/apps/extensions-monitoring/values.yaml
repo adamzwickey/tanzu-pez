@@ -1,0 +1,5 @@
+prometheus:
+  ingressFQDN: prometheus.tanzu.com
+grafana:
+  ingressFQDN: grafana.tanzu.com
+  pwd: topsecret

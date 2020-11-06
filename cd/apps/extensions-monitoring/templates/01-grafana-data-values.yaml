@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-data-values
+  namespace: tanzu-system-monitoring
+type: Opaque
+stringData:
+  values.yaml: |
+    #@data/values
+    #@overlay/match-child-defaults missing_ok=True
+    ---
+    infrastructure_provider: "vsphere"
+    ingress:
+      enabled: true
+      virtual_host_fqdn: "{{ .Values.grafana.ingressFQDN }}"
+    monitoring:
+      grafana:
+        image:
+          repository: "registry.tkg.vmware.run/grafana"
+        secret:
+          admin_password: "{{ .Values.grafana.pwd }}"
+      grafana_init_container:
+        image:
+          repository: "registry.tkg.vmware.run/grafana"
+      grafana_sc_dashboard:
+        image:
+          repository: "registry.tkg.vmware.run/grafana"

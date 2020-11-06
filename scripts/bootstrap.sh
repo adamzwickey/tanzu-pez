@@ -326,8 +326,6 @@ while kubectl get certificates.cert-manager.io -n tanzu-system-registry harbor-t
 done
 
 echo "Installing Tanzu Build Service..."
-sleep 500
-
 tar xvf temp/build-service-$(yq r $VARS_YAML tbs.version).tar -C temp/
 #login to harbor and login to pvtl registry
 export HARBOR_DOMAIN=$(yq r cd/clusters/shared-services/values.yaml harbor.domain)

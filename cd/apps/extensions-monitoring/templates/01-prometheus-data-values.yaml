@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: prometheus-data-values
+  namespace: tanzu-system-monitoring
+type: Opaque
+stringData:
+  values.yaml: |
+    #@data/values
+    #@overlay/match-child-defaults missing_ok=True
+    ---
+    infrastructure_provider: "vsphere"
+    ingress:
+      enabled: true
+      virtual_host_fqdn: "{{ .Values.prometheus.ingressFQDN }}"
+    monitoring:
+      prometheus_server:
+        image:
+          repository: registry.tkg.vmware.run/prometheus
+      alertmanager:
+        image:
+          repository: registry.tkg.vmware.run/prometheus
+      kube_state_metrics:
+        image:
+          repository: registry.tkg.vmware.run/prometheus
+      node_exporter:
+        image:
+          repository: registry.tkg.vmware.run/prometheus
+      pushgateway:
+        image:
+          repository: registry.tkg.vmware.run/prometheus
+      cadvisor:
+        image:
+          repository: registry.tkg.vmware.run/prometheus
+      prometheus_server_configmap_reload:
+        image:
+          repository: registry.tkg.vmware.run/prometheus
+      prometheus_server_init_container:
+        image:
+          repository: registry.tkg.vmware.run/prometheus
