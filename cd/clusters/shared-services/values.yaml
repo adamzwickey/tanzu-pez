@@ -3,15 +3,15 @@ todosRepo: https://gitlab.com/azwickey/todos.git
 targetRevision: HEAD
 server: https://kubernetes.api.lb:6443  # This must be overridden
 ingress:
-  ingressFQDN: '*.tanzu.zwickey.net'
+  ingressFQDN: '*.private.tanzu.zwickey.net'
   email: azwickey@vmware.com
 harbor:
-  domain: registry.tanzu.zwickey.net
+  domain: registry.private.tanzu.zwickey.net
   pwd: VMware1! # This must be overridden
 kubeapps:
-  domain: catalog.tanzu.zwickey.net
+  domain: catalog.private.tanzu.zwickey.net
 dex:
-  ingressFQDN: dex.tanzu.zwickey.net
+  ingressFQDN: dex.private.tanzu.zwickey.net
   clientId: 0oaagkq37j5IEbOqe4x6
   clientSecret: topSecret # This must be overridden
   idpUrl: https://dev-104945.okta.com/oauth2/default

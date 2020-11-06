@@ -56,6 +56,7 @@ expect
 EOD
 
 #We need to make sure we wait for all worker and master nodes to come online
+kubectl config use-context $SHARED_SERVICES_NS
 while kubectl get nodes -l node-role.kubernetes.io/master= | grep Ready | wc -l | grep $(yq r $VARS_YAML shared-services.controlPlaneCount) ; [ $? -ne 0 ]; do
     echo Shared Service Cluster Master Nodes not online
     sleep 5s
@@ -182,16 +183,23 @@ yq write generated/supervisor/workload2.yaml -i "controlPlaneClass" $(yq r $VARS
 yq write generated/supervisor/workload2.yaml -i "workerCount" $(yq r $VARS_YAML workload2.workerCount)
 yq write generated/supervisor/workload2.yaml -i "workerClass" $(yq r $VARS_YAML workload2.workerClass)
 helm install $(yq r $VARS_YAML workload2.name) cd/apps/workload-cluster/ --namespace $(yq r $VARS_YAML workload2.namespace) -f generated/supervisor/workload2.yaml
-sleep 10
 
-while kubectl get tanzukubernetesclusters $(yq r $VARS_YAML workload1.name) -n $(yq r $VARS_YAML workload1.namespace) | grep running ; [ $? -ne 0 ]; do
-	echo $(yq r $VARS_YAML workload1.name) Cluster is not Running...
-	sleep 5s
+#We need to make sure we wait for all worker and master nodes to come online
+while kubectl get machines.cluster.x-k8s.io -n $(yq r $VARS_YAML workload1.namespace) | grep $(yq r $VARS_YAML workload1.name)-control-plane- | grep Running | wc -l | grep $(yq r $VARS_YAML workload1.controlPlaneCount) ; [ $? -ne 0 ]; do
+    echo $(yq r $VARS_YAML workload1.name) control plane not online
+    sleep 5s
 done
-
-while kubectl get tanzukubernetesclusters $(yq r $VARS_YAML workload2.name) -n $(yq r $VARS_YAML workload2.namespace) | grep running ; [ $? -ne 0 ]; do
-	echo $(yq r $VARS_YAML workload2.name) Cluster is not Running...
-	sleep 5s
+while kubectl get machines.cluster.x-k8s.io -n $(yq r $VARS_YAML workload1.namespace) | grep $(yq r $VARS_YAML workload1.name)-workers- | grep Running | wc -l | grep $(yq r $VARS_YAML workload1.controlPlaneCount) ; [ $? -ne 0 ]; do
+    echo $(yq r $VARS_YAML workload1.name) workers not online
+    sleep 5s
+done
+while kubectl get machines.cluster.x-k8s.io -n $(yq r $VARS_YAML workload2.namespace) | grep $(yq r $VARS_YAML workload2.name)-control-plane- | grep Running | wc -l | grep $(yq r $VARS_YAML workload2.controlPlaneCount) ; [ $? -ne 0 ]; do
+    echo $(yq r $VARS_YAML workload2.name) control plane not online
+    sleep 5s
+done
+while kubectl get machines.cluster.x-k8s.io -n $(yq r $VARS_YAML workload2.namespace) | grep $(yq r $VARS_YAML workload2.name)-workers- | grep Running | wc -l | grep $(yq r $VARS_YAML workload2.controlPlaneCount) ; [ $? -ne 0 ]; do
+    echo $(yq r $VARS_YAML workload2.name) workers not online
+    sleep 5s
 done
 
 #Add Workloads to ArgoCD
@@ -304,8 +312,22 @@ done
 kubectl create secret generic route53-credentials --from-literal=secret-access-key=$(yq r $VARS_YAML aws.secretKey) -n cert-manager
 kubectl apply -f generated/workload2/cluster-issuer-dns.yaml
 
-#Install Build Service on Shared Services
-kubectl config use-context $SHARED_SERVICES_NAME
+# Install Build Service on Shared Services
+# Need to make sure Harbor is ready
+kubectl config use-context $SHARED_SERVICES_NAME;
+while kubectl get po -l app=harbor,component=core -n tanzu-system-registry | grep Running ; [ $? -ne 0 ]; do
+	echo Harbor Registry is not yet ready
+	sleep 5s
+done
+
+while kubectl get certificates.cert-manager.io -n tanzu-system-registry harbor-tls-acme | grep True; [ $? -ne 0 ]; do
+	echo Harbor Registry Certificate is not yet ready
+	sleep 5s
+done
+
+echo "Installing Tanzu Build Service..."
+sleep 500
+
 tar xvf temp/build-service-$(yq r $VARS_YAML tbs.version).tar -C temp/
 #login to harbor and login to pvtl registry
 export HARBOR_DOMAIN=$(yq r cd/clusters/shared-services/values.yaml harbor.domain)
