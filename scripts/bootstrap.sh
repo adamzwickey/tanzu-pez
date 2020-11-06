@@ -60,7 +60,7 @@ while kubectl get nodes -l node-role.kubernetes.io/master= | grep Ready | wc -l 
     echo Shared Service Cluster Master Nodes not online
     sleep 5s
 done
-while kubectl get nodes -l node-role.kubernetes.io/worker= | grep Ready | wc -l | grep $(yq r $VARS_YAML shared-services.workerCount) ; [ $? -ne 0 ]; do
+while kubectl get nodes | grep workers | grep Ready | wc -l | grep $(yq r $VARS_YAML shared-services.workerCount) ; [ $? -ne 0 ]; do
     echo Shared Service Cluster Worker Nodes not online
     sleep 5s
 done
@@ -115,7 +115,7 @@ export ARGO_VIP=$(kubectl get svc -n argocd argocd-server -o json | jq -r '.stat
 echo "ArgoCD VIP: $ARGO_VIP"
 #Wait for argo and ingress to be ready
 while nslookup $(yq r $VARS_YAML shared-services.argo.ingress) | grep $ARGO_VIP ; [ $? -ne 0 ]; do
-	echo Argo Server and DNS is not yet ready
+	echo Argo DNS is not yet propagated
 	sleep 5s
 done
 while kubectl get po -l app.kubernetes.io/instance=argocd -n argocd | grep Running | wc -l | grep 5; [ $? -ne 0 ]; do
