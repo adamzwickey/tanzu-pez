@@ -56,11 +56,11 @@ expect
 EOD
 
 #We need to make sure we wait for all worker and master nodes to come online
-while kubectl nodes -l node-role.kubernetes.io/master= | grep Ready | wc -l | grep $(yq r $VARS_YAML shared-services.controlPlaneCount) ; [ $? -ne 0 ]; do
+while kubectl get nodes -l node-role.kubernetes.io/master= | grep Ready | wc -l | grep $(yq r $VARS_YAML shared-services.controlPlaneCount) ; [ $? -ne 0 ]; do
     echo Shared Service Cluster Master Nodes not online
     sleep 5s
 done
-while kubectl nodes -l node-role.kubernetes.io/worker= | grep Ready | wc -l | grep $(yq r $VARS_YAML shared-services.workerCount) ; [ $? -ne 0 ]; do
+while kubectl get nodes -l node-role.kubernetes.io/worker= | grep Ready | wc -l | grep $(yq r $VARS_YAML shared-services.workerCount) ; [ $? -ne 0 ]; do
     echo Shared Service Cluster Worker Nodes not online
     sleep 5s
 done
