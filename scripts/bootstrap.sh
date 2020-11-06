@@ -299,6 +299,7 @@ while kubectl get po -n cert-manager | grep Running | wc -l | grep 3 ; [ $? -ne 
     echo Cert Manager is not yet ready
     sleep 5s
 done
+sleep 60 # seems to be needed to allow cert manager pods to startup
 kubectl create secret generic route53-credentials --from-literal=secret-access-key=$(yq r $VARS_YAML aws.secretKey) -n cert-manager
 kubectl apply -f generated/workload1/cluster-issuer-dns.yaml
 
@@ -311,6 +312,7 @@ while kubectl get po -n cert-manager | grep Running | wc -l | grep 3 ; [ $? -ne 
     echo Cert Manager is not yet ready
     sleep 5s
 done
+sleep 60 # seems to be needed to allow cert manager pods to startup
 kubectl create secret generic route53-credentials --from-literal=secret-access-key=$(yq r $VARS_YAML aws.secretKey) -n cert-manager
 kubectl apply -f generated/workload2/cluster-issuer-dns.yaml
 
@@ -330,13 +332,13 @@ done
 echo "Installing Tanzu Build Service..."
 tar xvf temp/build-service-$(yq r $VARS_YAML tbs.version).tar -C temp/
 #login to harbor and login to pvtl registry
-export HARBOR_DOMAIN=$(yq r cd/clusters/shared-services/values.yaml harbor.domain)
-export HARBOR_PWD=$(yq r cd/clusters/shared-services/values.yaml harbor.pwd)
+export HARBOR_DOMAIN=$(yq r $VARS_YAML shared-services.harbor.ingress)
+export HARBOR_PWD=$(yq r $VARS_YAML shared-services.harbor.pwd)
 docker login $HARBOR_DOMAIN -u admin -p $HARBOR_PWD
 docker login registry.pivotal.io \
        -u $(yq r $VARS_YAML tbs.network.user) -p $(yq r $VARS_YAML tbs.network.pwd) 
 # Create the project
-curl -X POST "https://registry.tanzu.zwickey.net/api/v2.0/projects" -H "accept: application/json" \
+curl -X POST "https://$HARBOR_DOMAIN/api/v2.0/projects" -H "accept: application/json" \
   -u admin:$HARBOR_PWD -H "Content-Type: application/json" \
   -d "{ \"count_limit\": -1, \"project_name\": \"tbs\", \"cve_whitelist\": {}, \"storage_limit\": -1, \"metadata\": { \"enable_content_trust\": \"false\", \"auto_scan\": \"true\", \"public\": \"false\" }}"
 curl -L -ik -u admin:$HARBOR_PWD -H "Content-Type: application/json" https://$HARBOR_DOMAIN/api/v2.0/projects
