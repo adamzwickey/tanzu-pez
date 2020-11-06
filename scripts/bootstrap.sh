@@ -6,11 +6,12 @@ export SUPERVISOR_VIP=$(yq r $VARS_YAML vsphere.supervisor-vip)
 export SUPERVISOR_USERNAME=$(yq r $VARS_YAML vsphere.username)
 export SUPERVISOR_PWD=$(yq r $VARS_YAML vsphere.password)
 export VCSA=$(yq r $VARS_YAML vsphere.host)
-echo $(yq r $VARS_YAML vsphere.password) | pbcopy
-echo "*************************"
-echo "vSphere to clipboard.  cntrl+C when prompted for pwd"
-echo "*************************"
-kubectl vsphere login -v 4 --server=$SUPERVISOR_VIP --insecure-skip-tls-verify -u $SUPERVISOR_USERNAME
+expect <<EOD
+spawn kubectl vsphere login --server=$SUPERVISOR_VIP --insecure-skip-tls-verify -u $SUPERVISOR_USERNAME
+expect "Password: "
+send "$SUPERVISOR_PWD\n"
+expect
+EOD
 
 # Create Namespaces
 python ./scripts/create-namespace.py -s $VCSA -u $SUPERVISOR_USERNAME -p $SUPERVISOR_PWD \
@@ -45,12 +46,25 @@ while kubectl get tanzukubernetesclusters $SHARED_SERVICES_NAME -n $SHARED_SERVI
 	echo Shared Services Cluster is not Running...
 	sleep 5s
 done
+sleep 10
 
-kubectl vsphere login -v 4 --server=$SUPERVISOR_VIP \
-   --tanzu-kubernetes-cluster-name $SHARED_SERVICES_NAME \
-   --tanzu-kubernetes-cluster-namespace $SHARED_SERVICES_NS \
-   --insecure-skip-tls-verify \
-   -u $SUPERVISOR_USERNAME
+expect <<EOD
+spawn kubectl vsphere login --server=$SUPERVISOR_VIP --tanzu-kubernetes-cluster-name $SHARED_SERVICES_NAME --tanzu-kubernetes-cluster-namespace $SHARED_SERVICES_NS --insecure-skip-tls-verify -u $SUPERVISOR_USERNAME
+expect "Password: "
+send "$SUPERVISOR_PWD\n"
+expect
+EOD
+
+#We need to make sure we wait for all worker and master nodes to come online
+while kubectl nodes -l node-role.kubernetes.io/master= | grep Ready | wc -l | grep $(yq r $VARS_YAML shared-services.controlPlaneCount) ; [ $? -ne 0 ]; do
+    echo Shared Service Cluster Master Nodes not online
+    sleep 5s
+done
+while kubectl nodes -l node-role.kubernetes.io/worker= | grep Ready | wc -l | grep $(yq r $VARS_YAML shared-services.workerCount) ; [ $? -ne 0 ]; do
+    echo Shared Service Cluster Worker Nodes not online
+    sleep 5s
+done
+
 
 # Deploy pre-reqs for ArgoCD
 kubectl config use-context $SHARED_SERVICES_NS
@@ -61,7 +75,7 @@ while kubectl get po -n cert-manager | grep Running | wc -l | grep 3 ; [ $? -ne 
     echo Cert Manager is not yet ready
     sleep 5s
 done
-sleep 10 # seems to be needed to allow cert manager pods to startup
+sleep 60 # seems to be needed to allow cert manager pods to startup
 cp manifests/shared-cluster-issuer-dns.yaml generated/shared/
 yq write generated/shared/shared-cluster-issuer-dns.yaml -i "spec.acme.solvers[0].dns01.route53.region" $(yq r $VARS_YAML aws.region)
 yq write generated/shared/shared-cluster-issuer-dns.yaml -i "spec.acme.solvers[0].dns01.route53.hostedZoneID" $(yq r $VARS_YAML aws.hostedZoneId)
@@ -102,6 +116,15 @@ echo "ArgoCD VIP: $ARGO_VIP"
 #Wait for argo and ingress to be ready
 while nslookup $(yq r $VARS_YAML shared-services.argo.ingress) | grep $ARGO_VIP ; [ $? -ne 0 ]; do
 	echo Argo Server and DNS is not yet ready
+	sleep 5s
+done
+while kubectl get po -l app.kubernetes.io/instance=argocd -n argocd | grep Running | wc -l | grep 5; [ $? -ne 0 ]; do
+	echo ArgoCD is not yet ready
+	sleep 5s
+done
+
+while kubectl get certificates.cert-manager.io -n argocd argocd-server | grep True; [ $? -ne 0 ]; do
+	echo ArgoCD Certificate is not yet ready
 	sleep 5s
 done
 
@@ -174,11 +197,12 @@ done
 #Add Workloads to ArgoCD
 export WORKLOAD1_NAME=$(yq r $VARS_YAML workload1.name)
 export WORKLOAD1_NAMESPACE=$(yq r $VARS_YAML workload1.namespace)
-kubectl vsphere login -v 4 --server=$SUPERVISOR_VIP \
-   --tanzu-kubernetes-cluster-name $WORKLOAD1_NAME \
-   --tanzu-kubernetes-cluster-namespace $WORKLOAD1_NAMESPACE \
-   --insecure-skip-tls-verify \
-   -u $SUPERVISOR_USERNAME
+expect <<EOD
+spawn kubectl vsphere login --server=$SUPERVISOR_VIP --tanzu-kubernetes-cluster-name $WORKLOAD1_NAME --tanzu-kubernetes-cluster-namespace $WORKLOAD1_NAMESPACE --insecure-skip-tls-verify -u $SUPERVISOR_USERNAME
+expect "Password: "
+send "$SUPERVISOR_PWD\n"
+expect
+EOD
 kubectl config use-context $WORKLOAD1_NAME
 kubectl create ns argocd
 kubectl create serviceaccount argocd -n argocd
@@ -195,11 +219,12 @@ argocd cluster list
 
 export WORKLOAD2_NAME=$(yq r $VARS_YAML workload2.name)
 export WORKLOAD2_NAMESPACE=$(yq r $VARS_YAML workload2.namespace)
-kubectl vsphere login -v 4 --server=$SUPERVISOR_VIP \
-   --tanzu-kubernetes-cluster-name $WORKLOAD2_NAME \
-   --tanzu-kubernetes-cluster-namespace $WORKLOAD2_NAMESPACE \
-   --insecure-skip-tls-verify \
-   -u $SUPERVISOR_USERNAME
+expect <<EOD
+spawn kubectl vsphere login --server=$SUPERVISOR_VIP --tanzu-kubernetes-cluster-name $WORKLOAD2_NAME --tanzu-kubernetes-cluster-namespace $WORKLOAD2_NAMESPACE --insecure-skip-tls-verify -u $SUPERVISOR_USERNAME
+expect "Password: "
+send "$SUPERVISOR_PWD\n"
+expect
+EOD
 kubectl config use-context $WORKLOAD2_NAME
 kubectl create ns argocd
 kubectl create serviceaccount argocd -n argocd
@@ -303,20 +328,51 @@ ytt -f temp/values.yaml -f temp/manifests/ \
     | kbld -f temp/images-relocated.lock -f- \
     | kapp deploy -a tanzu-build-service -f- -y
 # This step takes a long time when on the VPN so we'll try it on jumpbox
-echo $(yq r $VARS_YAML vsphere.password) | pbcopy
-echo "*************************"
-echo "jumpbox copied to clipboard.  cntrl+C when prompted for pwd"
-echo "*************************"
-scp temp/$(yq r $VARS_YAML tbs.descriptor) ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~
-scp temp/kp-linux-0.1.3 ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~/kp
+expect <<EOD
+spawn scp temp/$(yq r $VARS_YAML tbs.descriptor) ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~
+expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
+send "$(yq r $VARS_YAML vsphere.password)\n"
+expect
+EOD
+expect <<EOD
+spawn scp temp/kp-linux-0.1.3 ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~/kp
+expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
+send "$(yq r $VARS_YAML vsphere.password)\n"
+expect
+EOD
 kubectl config use-context $SHARED_SERVICES_NAME;
 kubectl config view --raw > /tmp/kubeconfig
-scp /tmp/kubeconfig ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~
-ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) docker login registry.pivotal.io -u $(yq r $VARS_YAML tbs.network.user) -p $(yq r $VARS_YAML tbs.network.pwd)
-ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) docker login $HARBOR_DOMAIN -u admin -p $HARBOR_PWD
-ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) KUBECONFIG=kubeconfig ./kp import -f $(yq r $VARS_YAML tbs.descriptor)
-echo "*** When prompted enter harbor pwd ***"
-kp secret create harbor-secret --registry $HARBOR_DOMAIN --registry-user admin
+expect <<EOD
+spawn scp /tmp/kubeconfig ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~
+expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
+send "$(yq r $VARS_YAML vsphere.password)\n"
+expect
+EOD
+expect <<EOD
+spawn ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) docker login registry.pivotal.io -u $(yq r $VARS_YAML tbs.network.user) -p $(yq r $VARS_YAML tbs.network.pwd)
+expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
+send "$(yq r $VARS_YAML vsphere.password)\n"
+expect
+EOD
+expect <<EOD
+spawn ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) docker login $HARBOR_DOMAIN -u admin -p $HARBOR_PWD
+expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
+send "$(yq r $VARS_YAML vsphere.password)\n"
+expect
+EOD
+expect <<EOD
+spawn ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) KUBECONFIG=kubeconfig ./kp import -f $(yq r $VARS_YAML tbs.descriptor)
+expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
+send "$(yq r $VARS_YAML vsphere.password)\n"
+expect
+EOD
+
+expect <<EOD
+spawn kp secret create harbor-secret --registry $HARBOR_DOMAIN --registry-user admin
+expect "registry password: "
+send "$HARBOR_PWD\n"
+expect
+EOD
 
 #Create a test image just to make sure we're working
 kp image create test --tag $HARBOR_DOMAIN/library/test --git https://github.com/adamzwickey/fortune-demo
