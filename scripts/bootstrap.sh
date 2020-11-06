@@ -14,15 +14,15 @@ expect
 EOD
 
 # Create Namespaces
-python ./scripts/create-namespace.py -s $VCSA -u $SUPERVISOR_USERNAME -p $SUPERVISOR_PWD \
+python3 ./scripts/create-namespace.py -s $VCSA -u $SUPERVISOR_USERNAME -p $SUPERVISOR_PWD \
        -cl $(yq r $VARS_YAML vsphere.clusterName) -role EDIT -st USER -subject $SUPERVISOR_USERNAME \
        -domain $(echo $SUPERVISOR_USERNAME | cut -d "@" -f 2) -sp $(yq r $VARS_YAML shared-services.storage) \
        -ns $(yq r $VARS_YAML shared-services.namespace)
-python ./scripts/create-namespace.py -s $VCSA -u $SUPERVISOR_USERNAME -p $SUPERVISOR_PWD \
+python3 ./scripts/create-namespace.py -s $VCSA -u $SUPERVISOR_USERNAME -p $SUPERVISOR_PWD \
        -cl $(yq r $VARS_YAML vsphere.clusterName) -role EDIT -st USER -subject $SUPERVISOR_USERNAME \
        -domain $(echo $SUPERVISOR_USERNAME | cut -d "@" -f 2) -sp $(yq r $VARS_YAML workload1.storage) \
        -ns $(yq r $VARS_YAML workload1.namespace)
-python ./scripts/create-namespace.py -s $VCSA -u $SUPERVISOR_USERNAME -p $SUPERVISOR_PWD \
+python3 ./scripts/create-namespace.py -s $VCSA -u $SUPERVISOR_USERNAME -p $SUPERVISOR_PWD \
        -cl $(yq r $VARS_YAML vsphere.clusterName) -role EDIT -st USER -subject $SUPERVISOR_USERNAME \
        -domain $(echo $SUPERVISOR_USERNAME | cut -d "@" -f 2) -sp $(yq r $VARS_YAML workload2.storage) \
        -ns $(yq r $VARS_YAML workload2.namespace)
