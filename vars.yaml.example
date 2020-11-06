@@ -1,8 +1,9 @@
 repo: https://gitlab.com/azwickey/tanzu-pez.git
 vsphere:
+  jumpbox: ubuntu-439.haas-439.pez.vmware.com
   host: vcsa-01.haas-439.pez.vmware.com
   username: administrator@vsphere.local
-  password: xxxxx
+  password: xxxxxx
   supervisor-vip: 10.213.147.129
   clusterName: Cluster
 shared-services:
@@ -12,11 +13,17 @@ shared-services:
   kubernetesVersion: v1.18.5 
   controlPlaneCount: "3"
   controlPlaneClass: best-effort-medium
-  workerCount: "3"
-  workerClass: best-effort-xlarge
+  workerCount: "5"
+  workerClass: best-effort-large
+  harbor:
+    pwd: xxxxxx
+    ingress: registry.private.tanzu.zwickey.net
+  grafana:
+    pwd: xxxxxx
+    ingress: grafana.private.tanzu.zwickey.net
   argo:
-    password: xxxx
-    ingress: argo.tanzu.zwickey.net
+    password: xxxxxx
+    ingress: argocd.private.tanzu.zwickey.net
 workload1:
   namespace: demo
   name: workload-cluster1
@@ -25,7 +32,7 @@ workload1:
   controlPlaneCount: "3"
   controlPlaneClass: best-effort-medium
   workerCount: "3"
-  workerClass: best-effort-xlarge
+  workerClass: best-effort-large
 workload2:
   namespace: demo
   name: workload-cluster2
@@ -34,12 +41,20 @@ workload2:
   controlPlaneCount: "3"
   controlPlaneClass: best-effort-medium
   workerCount: "3"
-  workerClass: best-effort-xlarge
+  workerClass: best-effort-large
 aws:
-  accessKey: xxxxx
-  secretKey: xxxxx
+  accessKey: xxxxxx
+  secretKey: xxxxxx
   hostedZoneId: xxxxxx
   region: us-east-2
 tmc:
-  token: xxxx
+  token: xxxxxx
   group: demo
+dex:
+  clientSecret: xxxxxx  
+tbs:
+  version: 1.0.3
+  descriptor: "descriptor-100.0.42.yaml"
+  network:
+    user: azwickey@pivotal.io
+    pwd: xxxxxx
