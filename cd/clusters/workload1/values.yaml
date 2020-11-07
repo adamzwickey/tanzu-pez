@@ -3,10 +3,10 @@ repoURL: https://gitlab.com/azwickey/tanzu-pez.git
 targetRevision: HEAD
 server: https://kubernetes.api.lb:6443  # This must be overridden
 ingress:
-  ingressFQDN: '*.workload1.cloud.zwickey.net'
+  ingressFQDN: '*.workload1.vmware.cloud.zwickey.net'
   email: azwickey@vmware.com
 kubeapps:
-  domain: catalog.workload1.cloud.zwickey.net
+  domain: catalog.workload1.vmware.cloud.zwickey.net
 aws:
   credentials:
     accessKey: AKIAJJLAD2LEFJJIEOBA

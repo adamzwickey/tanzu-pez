@@ -4,20 +4,20 @@ todosRepo: https://gitlab.com/azwickey/todos.git
 targetRevision: HEAD
 server: https://kubernetes.api.lb:6443  # This must be overridden
 ingress:
-  ingressFQDN: '*.cloud.zwickey.net'
+  ingressFQDN: '*.vmware.cloud.zwickey.net'
   email: azwickey@vmware.com
 harbor:
-  domain: registry.cloud.zwickey.net
+  domain: registry.vmware.cloud.zwickey.net
   pwd: topSecret # This must be overridden
 prometheus:
-  ingressFQDN: prometheus.cloud.zwickey.net
+  ingressFQDN: prometheus.vmware.cloud.zwickey.net
 grafana:
-  ingressFQDN: grafana.cloud.zwickey.net
+  ingressFQDN: grafana.vmware.cloud.zwickey.net
   pwd: topSecret # This must be overridden
 kubeapps:
-  domain: catalog.cloud.zwickey.net
+  domain: catalog.vmware.cloud.zwickey.net
 dex:
-  ingressFQDN: dex.cloud.zwickey.net
+  ingressFQDN: dex.vmware.cloud.zwickey.net
   clientId: 0oaagkq37j5IEbOqe4x6
   clientSecret: topSecret # This must be overridden
   idpUrl: https://dev-104945.okta.com/oauth2/default
