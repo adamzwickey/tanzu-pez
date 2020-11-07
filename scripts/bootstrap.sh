@@ -353,6 +353,7 @@ curl -X PUT "https://$HARBOR_DOMAIN/api/v2.0/projects/1" -H "accept: application
   -u admin:$HARBOR_PWD -H "Content-Type: application/json" \
   -d "{ \"metadata\": { \"auto_scan\": \"true\" }}"
 # Install TBS
+kubectl config use-context $SHARED_SERVICES_NAME;
 kbld relocate -f temp/images.lock --lock-output temp/images-relocated.lock \
   --repository $HARBOR_DOMAIN/tbs/build-service
 ytt -f temp/values.yaml -f temp/manifests/ \
@@ -360,9 +361,8 @@ ytt -f temp/values.yaml -f temp/manifests/ \
     -v docker_username="admin" \
     -v docker_password="$HARBOR_PWD" \
     | kbld -f temp/images-relocated.lock -f- \
-    | kapp deploy -a tanzu-build-service -f- -y
+    | kapp deploy -n default -a tanzu-build-service -f- -y
 # This step takes a long time when on the VPN so it may be best to execute on jumpbox
-kubectl config use-context $SHARED_SERVICES_NAME;
 kp import -f temp/$(yq r $VARS_YAML tbs.descriptor)
 expect <<EOD
 spawn kp secret create harbor-secret --registry $HARBOR_DOMAIN --registry-user admin
