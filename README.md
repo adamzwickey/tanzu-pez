@@ -7,7 +7,7 @@ This project is meant to automate the paving of TKG-S environments, including co
 Most installations are done via and ArgoCD utilizing the [App of Apps pattern](https://argoproj.github.io/argo-cd/operator-manual/cluster-bootstrapping/)
 
 
-![home](https://gitlab.com/azwickey/tanzu-pez/-/raw/master/img/argo.png "argo")
+![home](https://gitlab.com/azwickey/tanzu-pez/-/raw/master/images/argo.png "argo")
 
 ## Installation
 It will be easiest and fastest to execute the bootstrapping from the ubuntu jumpbox.  However, it is also possible to execute from a local workstation (e.g. macbook) assuming that you have network connectivity over VPN to all VMs in cluster.  Note, that tools install script will only work in an Ubuntu env.
