@@ -295,6 +295,61 @@ tmc login --no-configure --name temp
 tmc cluster attach -g $TMC_GROUP -n $WORKLOAD2_NAME -o generated/workload2/tmc.yaml --management-cluster-name attached --provisioner-name attached
 kubectl apply -f generated/workload2/tmc.yaml
 
+# TODO Add namespaces via TMC
+
+# TODO Add to TSM
+kubectl config use-context $WORKLOAD1_NAME
+export TSM_SERVER=$(yq r $VARS_YAML tsm.server)
+export CSP_TOKEN=$(yq r $VARS_YAML tsm.token | tr -d '\n')
+export ACCESS_TOKEN=$(curl --request POST \
+--url https://console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize \
+--header 'content-type: application/x-www-form-urlencoded' \
+--data refresh_token=$CSP_TOKEN | jq -r .access_token)
+
+kubectl apply -f https://$TSM_SERVER/cluster-registration/k8s/operator-deployment.yaml
+export CLUSTER_TOKEN=$(curl --request PUT \
+--url https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD1_NAME/token \
+-H "accept: application/json" \
+-H "csp-auth-token: $ACCESS_TOKEN" | jq -r .token)
+echo "Cluster Token: $CLUSTER_TOKEN"
+kubectl -n vmware-system-tsm create secret generic cluster-token --from-literal=token=$CLUSTER_TOKEN
+
+while curl -X GET "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD1_NAME" -H "accept: application/json" -H "csp-auth-token: $ACCESS_TOKEN" | jq .status.state | grep -i Connected | wc -l | grep 1 ; [ $? -ne 0 ]; do
+    echo Cluster $WORKLOAD1_NAME Not yet conneced with TSM Control Plane
+    sleep 5s
+done
+echo "Installing Istio"
+curl -X POST "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD1_NAME/apps" \
+  -H "accept: application/json" -H "Content-Type: application/json" \
+  -H "csp-auth-token: $ACCESS_TOKEN" \
+  -d "{\"name\":\"Istio\",\"version\":\"Default\"}"
+#Need to annotate the ingress svc for external DNS
+sleep 10
+kubectl annotate service istio-ingressgateway "external-dns.alpha.kubernetes.io/hostname=*.$(yq r $VARS_YAML todos.cluster1.baseDomain)." -n istio-system --overwrite
+
+kubectl config use-context $WORKLOAD2_NAME
+kubectl apply -f https://$TSM_SERVER/cluster-registration/k8s/operator-deployment.yaml
+export CLUSTER_TOKEN=$(curl --request PUT \
+--url https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD2_NAME/token \
+-H "accept: application/json" \
+-H "csp-auth-token: $ACCESS_TOKEN" | jq -r .token)
+echo "Cluster Token: $CLUSTER_TOKEN"
+kubectl -n vmware-system-tsm create secret generic cluster-token --from-literal=token=$CLUSTER_TOKEN
+
+while curl -X GET "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD2_NAME" -H "accept: application/json" -H "csp-auth-token: $ACCESS_TOKEN" | jq .status.state | grep -i Connected | wc -l | grep 1 ; [ $? -ne 0 ]; do
+    echo Cluster $WORKLOAD2_NAME Not yet conneced with TSM Control Plane
+    sleep 5s
+done
+echo "Installing Istio"
+curl -X POST "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD2_NAME/apps" \
+  -H "accept: application/json" -H "Content-Type: application/json" \
+  -H "csp-auth-token: $ACCESS_TOKEN" \
+  -d "{\"name\":\"Istio\",\"version\":\"Default\"}"
+#Need to annotate the ingress svc for external DNS
+sleep 10
+kubectl annotate service istio-ingressgateway "external-dns.alpha.kubernetes.io/hostname=*.$(yq r $VARS_YAML todos.cluster2.baseDomain)." -n istio-system --overwrite
+
+
 cp manifests/shared-cluster-issuer-dns.yaml generated/workload1/cluster-issuer-dns.yaml
 yq write generated/workload1/cluster-issuer-dns.yaml -i "spec.acme.solvers[0].dns01.route53.region" $(yq r $VARS_YAML aws.region)
 yq write generated/workload1/cluster-issuer-dns.yaml -i "spec.acme.solvers[0].dns01.route53.hostedZoneID" $(yq r $VARS_YAML aws.hostedZoneId)
