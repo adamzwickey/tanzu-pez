@@ -20,10 +20,17 @@ export VARS_YAML=vars.yaml
 ```
 - Edit vars.yaml, providing configuration values that reflect your desired envornment.
 - Additionally, edit the values.yaml file(s) in `/cd/clusters/shared-services`, `/cd/clusters/workload1`, and `/cd/clusters/workload2` to reflect your environment.  This will drive the true GitOps worklfow.  Any value that has a comment of `# This must be overridden ` does not need to be changed as this is a _Secret_ that will be read from the vars.yaml.  These changes must be checked into and pushed to your fork of the repo.
-- Prepare your jumpbox with the needed tools (kubectl w/ vsphere plugin, jq, yq, argocd cli, tmc cli, ect...) by executing the tools installation script.  Note that you'll need to enter your sudo pwd for apt-get installations.
+- Prepare your jumpbox with the needed tools (kubectl w/ vsphere plugin, jq, yq, argocd cli, ect...) by executing the tools installation script.  Note that you'll need to enter your sudo pwd for apt-get installations.
 ```bash
 source ./scripts/install-tools.sh
 ```
+- There are a few tools you must download and install yourself:
+-- TMC CLI
+-- ytt
+-- kbld
+-- kapp
+-- kp
+
 - When you are ready to deploy execute the install script:
 ```bash
 source ./scripts/bootstrap.sh
