@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: workload2-kubeapps
   namespace: argocd
+  labels:
+    cluster: {{ .Values.clusterName }}
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
