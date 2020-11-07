@@ -275,6 +275,8 @@ argocd app create $WORKLOAD2_NAME-app-of-apps \
   --helm-set aws.credentials.secretKey=$(yq r $VARS_YAML aws.secretKey)
 
 # Add to TMC
+mkdir -p generated/workload1
+mkdir -p generated/workload2 
 export TMC_API_TOKEN=$(yq r $VARS_YAML tmc.token)
 export TMC_GROUP=$(yq r $VARS_YAML tmc.group)
 kubectl config use-context $SHARED_SERVICES_NAME
