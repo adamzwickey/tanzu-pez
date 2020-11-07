@@ -354,6 +354,7 @@ curl -X PUT "https://$HARBOR_DOMAIN/api/v2.0/projects/1" -H "accept: application
   -d "{ \"metadata\": { \"auto_scan\": \"true\" }}"
 # Install TBS
 kubectl config use-context $SHARED_SERVICES_NAME;
+kubectl config set-context --current --namespace=default
 kbld relocate -f temp/images.lock --lock-output temp/images-relocated.lock \
   --repository $HARBOR_DOMAIN/tbs/build-service
 ytt -f temp/values.yaml -f temp/manifests/ \
