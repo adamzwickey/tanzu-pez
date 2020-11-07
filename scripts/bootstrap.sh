@@ -359,54 +359,10 @@ ytt -f temp/values.yaml -f temp/manifests/ \
     -v docker_password="$HARBOR_PWD" \
     | kbld -f temp/images-relocated.lock -f- \
     | kapp deploy -a tanzu-build-service -f- -y
-# This step takes a long time when on the VPN so we'll try it on jumpbox
-expect <<EOD
-spawn scp temp/$(yq r $VARS_YAML tbs.descriptor) ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~
-expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
-send "$(yq r $VARS_YAML vsphere.password)\n"
-expect
-EOD
-expect <<EOD
-spawn scp temp/kp-linux-0.1.3 ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~/kp
-expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
-send "$(yq r $VARS_YAML vsphere.password)\n"
-expect
-EOD
+# This step takes a long time when on the VPN so it may be best to execute on jumpbox
 kubectl config use-context $SHARED_SERVICES_NAME;
-kubectl config view --raw > /tmp/kubeconfig
-expect <<EOD
-spawn scp /tmp/kubeconfig ubuntu@$(yq r $VARS_YAML vsphere.jumpbox):~
-expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
-send "$(yq r $VARS_YAML vsphere.password)\n"
-expect
-EOD
-expect <<EOD
-spawn ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) docker login registry.pivotal.io -u $(yq r $VARS_YAML tbs.network.user) -p $(yq r $VARS_YAML tbs.network.pwd)
-expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
-send "$(yq r $VARS_YAML vsphere.password)\n"
-expect
-EOD
-expect <<EOD
-spawn ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) docker login $HARBOR_DOMAIN -u admin -p $HARBOR_PWD
-expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
-send "$(yq r $VARS_YAML vsphere.password)\n"
-expect
-EOD
-expect <<EOD
-set timeout 600
-spawn ssh ubuntu@$(yq r $VARS_YAML vsphere.jumpbox) KUBECONFIG=kubeconfig ./kp import -f $(yq r $VARS_YAML tbs.descriptor)
-expect "ubuntu@$(yq r $VARS_YAML vsphere.jumpbox)'s password: "
-send "$(yq r $VARS_YAML vsphere.password)\n"
-expect
-EOD
-
-expect <<EOD
-spawn kp secret create harbor-secret --registry $HARBOR_DOMAIN --registry-user admin
-expect "registry password: "
-send "$HARBOR_PWD\n"
-expect
-EOD
-
+kp import -f temp/$(yq r $VARS_YAML tbs.descriptor)
+kp secret create harbor-secret --registry $HARBOR_DOMAIN --registry-user admin
 #Create a test image just to make sure we're working
 kp image create test --tag $HARBOR_DOMAIN/library/test-app \
     --git https://github.com/buildpacks/samples \
