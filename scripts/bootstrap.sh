@@ -128,6 +128,7 @@ while kubectl get certificates.cert-manager.io -n argocd argocd-server | grep Tr
 	echo ArgoCD Certificate is not yet ready
 	sleep 5s
 done
+sleep 5s
 
 # Login and config clusters
 argocd login $(yq r $VARS_YAML shared-services.argo.ingress) \
