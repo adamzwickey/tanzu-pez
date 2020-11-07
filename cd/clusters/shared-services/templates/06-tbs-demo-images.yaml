@@ -13,7 +13,7 @@ spec:
     server: {{ .Values.server }}
   project: default
   syncPolicy:
-    automated: {}
+    #automated: {} #Can't automate because it seems like KP gets into a bad state
   source:
     path: cd/apps/tbs-demo-images
     repoURL: {{ .Values.repoURL }}
