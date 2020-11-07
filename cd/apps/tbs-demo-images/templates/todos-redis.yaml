@@ -1,0 +1,23 @@
+apiVersion: kpack.io/v1alpha1
+kind: Image
+metadata:
+  name: todos-redis
+  namespace: default
+spec:
+  build:
+    env:
+    - name: BP_MAVEN_BUILT_MODULE
+      value: todos-redis
+  builder:
+    kind: ClusterBuilder
+    name: default
+  cacheSize: 2G
+  failedBuildHistoryLimit: 10
+  imageTaggingStrategy: BuildNumber
+  serviceAccount: default
+  source:
+    git:
+      revision: master
+      url: {{ .Values.repo }}
+  successBuildHistoryLimit: 10
+  tag: {{ .Values.harbor.domain }}/library/todos-redis
