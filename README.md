@@ -25,11 +25,13 @@ export VARS_YAML=vars.yaml
 source ./scripts/install-tools.sh
 ```
 - There are a few tools you must download and install yourself:
+```bash
 -- TMC CLI
 -- ytt
 -- kbld
 -- kapp
 -- kp
+```
 
 - When you are ready to deploy execute the install script:
 ```bash
