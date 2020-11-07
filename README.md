@@ -1,5 +1,5 @@
 # tanzu-pez
-This project is meant to automate the paving of TKG-S environments, including common extensions, in an PEZ env.  It includes TKG-S, TMC, TAC, TBS, TSM (automation soon), and TO (automation soon).  You could call this "__Tanzu In A Box__".  
+This project is meant to automate the paving of TKG-S environments, including common extensions, in an PEZ env.  It includes TKG-S, TMC, TAC, TBS, TSM, and TO (automation soon).  You could call this "__Tanzu In A Box__".  
 
 
 ![home](https://gitlab.com/azwickey/tanzu-pez/-/raw/master/images/PEZ-Demo.png "arch")
