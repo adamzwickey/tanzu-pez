@@ -66,7 +66,6 @@ while kubectl get nodes | grep workers | grep Ready | wc -l | grep $(yq r $VARS_
     sleep 5s
 done
 
-
 # Deploy pre-reqs for ArgoCD
 kubectl config use-context $SHARED_SERVICES_NS
 kubectl create clusterrolebinding psp:authenticated --clusterrole=psp:vmware-system-privileged --group=system:authenticated
@@ -334,6 +333,22 @@ while kubectl get certificates.cert-manager.io -n tanzu-system-registry harbor-t
 	echo Harbor Registry Certificate is not yet ready
 	sleep 5s
 done
+
+echo "Resizing Disks..."
+mkdir -p temp/
+kubectl config use-context $SUPERVISOR_VIP
+kubectl get secret $SHARED_SERVICES_NAME-ssh -n $SHARED_SERVICES_NS -ojsonpath="{.data.ssh-privatekey}" | base64 -d > temp/$SHARED_SERVICES_NAME.key
+chmod 600 temp/$SHARED_SERVICES_NAME.key
+kubectl get WCPMachine -n $SHARED_SERVICES_NS | grep workers | awk '{print $3}' > temp/ips
+cat temp/ips | while read IP 
+do
+   echo "Processing $IP"
+   scp -i temp/$SHARED_SERVICES_NAME.key -o StrictHostKeyChecking=no scripts/resize.sh vmware-system-user@$IP:~
+   ssh -i temp/$SHARED_SERVICES_NAME.key -o StrictHostKeyChecking=no vmware-system-user@$IP \
+     "sudo ./resize.sh"</dev/null
+   echo "done with $IP" 
+done
+
 
 echo "Installing Tanzu Build Service..."
 tar xvf temp/build-service-$(yq r $VARS_YAML tbs.version).tar -C temp/
