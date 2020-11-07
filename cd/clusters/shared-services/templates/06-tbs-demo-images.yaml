@@ -23,4 +23,4 @@ spec:
         - name: harbor.domain
           value: "{{ .Values.harbor.domain }}"
         - name: repo
-          value: "{{ .Values.harbor.domain }}"
+          value: "{{ .Values.todosRepo }}"
