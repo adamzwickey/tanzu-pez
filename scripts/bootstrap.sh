@@ -364,7 +364,13 @@ ytt -f temp/values.yaml -f temp/manifests/ \
 # This step takes a long time when on the VPN so it may be best to execute on jumpbox
 kubectl config use-context $SHARED_SERVICES_NAME;
 kp import -f temp/$(yq r $VARS_YAML tbs.descriptor)
-kp secret create harbor-secret --registry $HARBOR_DOMAIN --registry-user admin
+expect <<EOD
+spawn kp secret create harbor-secret --registry $HARBOR_DOMAIN --registry-user admin
+expect "registry password: "
+send "$HARBOR_PWD\n"
+expect
+EOD
+
 #Create a test image just to make sure we're working
 kp image create test --tag $HARBOR_DOMAIN/library/test-app \
     --git https://github.com/buildpacks/samples \
