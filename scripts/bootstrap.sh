@@ -152,6 +152,7 @@ argocd app create shared-services-app-of-apps \
   --repo $(yq r $VARS_YAML repo) \
   --dest-server $SERVER \
   --dest-namespace default \
+  --label cluster=$SHARED_SERVICES_NAME \
   --sync-policy automated \
   --path cd/clusters/shared-services \
   --helm-set server=$SERVER \
@@ -255,6 +256,7 @@ argocd app create $WORKLOAD1_NAME-app-of-apps \
   --repo $(yq r $VARS_YAML repo) \
   --dest-server $SERVER \
   --dest-namespace default \
+  --label cluster=$WORKLOAD1_NAME \
   --sync-policy automated \
   --path cd/clusters/workload1 \
   --helm-set server=$WORKLOAD1_SERVER \
@@ -265,6 +267,7 @@ argocd app create $WORKLOAD2_NAME-app-of-apps \
   --repo $(yq r $VARS_YAML repo) \
   --dest-server $SERVER \
   --dest-namespace default \
+  --label cluster=$WORKLOAD2_NAME \
   --sync-policy automated \
   --path cd/clusters/workload2 \
   --helm-set server=$WORKLOAD2_SERVER \
