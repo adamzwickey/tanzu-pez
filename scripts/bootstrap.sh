@@ -334,6 +334,8 @@ while kubectl get certificates.cert-manager.io -n tanzu-system-registry harbor-t
 	sleep 5s
 done
 
+echo "Prior to continuing, log into esxi host directly and resize worker VM disks.  Then press [ENTER]:"
+read confirmed
 echo "Resizing Disks..."
 mkdir -p temp/
 kubectl config use-context $SUPERVISOR_VIP
