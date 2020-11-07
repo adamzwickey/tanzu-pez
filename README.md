@@ -28,4 +28,10 @@ source ./scripts/install-tools.sh
 ```bash
 source ./scripts/bootstrap.sh
 ```
-- Installation typically takes around 45 min, depending on the speed of your env.
+- Installation typically takes around 45 min, depending on the speed of your env.  In almost all cases the install script is Idempotent.  If you have an incorrect setting you typically can simply re-execute the script.
+
+## Cleanup
+- To tear down the env execute the delete script.  At the moment this script doesn't remove the cluser from TMC or TSM.
+```bash
+source ./scripts/delete.sh
+```
