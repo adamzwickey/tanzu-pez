@@ -6,7 +6,13 @@ echo "******************************"
 echo "-- Installing kubectl and plugin --"
 : ${VARS_YAML?"Need to set VARS_YAML environment variable"}
 export SUPERVISOR_VIP=$(yq r $VARS_YAML vsphere.supervisor-vip)
-sudo apt-get install -y unzip
+export SUPERVISOR_USERNAME=$(yq r $VARS_YAML vsphere.username)
+expect <<EOD
+spawn sudo apt-get install -y unzip
+expect "[sudo] password for ubuntu: "
+send "$SUPERVISOR_PWD\n"
+expect
+EOD
 curl -k https://$SUPERVISOR_VIP/wcp/plugin/linux-amd64/vsphere-plugin.zip --output vsphere-plugin.zip
 unzip vsphere-plugin.zip
 sudo mv bin/kubectl /usr/local/bin/
