@@ -9,6 +9,20 @@ Most installations are done via and ArgoCD utilizing the [App of Apps pattern](h
 
 ![home](https://gitlab.com/azwickey/tanzu-pez/-/raw/master/images/argo.png "argo")
 
+Most installations are done via and ArgoCD utilizing the [App of Apps pattern](https://argoproj.github.io/argo-cd/operator-manual/cluster-bootstrapping/)
+
+
+![home](https://gitlab.com/azwickey/tanzu-pez/-/raw/master/images/argo.png "argo")
+
+## Demo Application 
+
+This environment is built to support a sample application that showcases Tanzu Kubernetes, Tanzu Build Service, Tanzu Application Catalog, Tanzu Observabilty, and Tanzu Sevice Mesh.  Simply put its a uService app build in [Spring Boot](http://spring.io/projects/spring-boot) using the Todo as a domain model. The **"Todo"** is well understood which makes it useful for reasoning about and comparing frameworks.  For example [**TodoMvc**](http://todomvc.com) is a resource developers can use to evaluate frontend frameworks against a concise and consistent model.
+
+![alt text](https://gitlab.com/azwickey/todos/-/raw/master/images/flow.png "Flow")
+
+![alt text](https://gitlab.com/azwickey/todos/-/raw/master/images/app.png "Screenshot")
+
+
 ## Installation
 It will be easiest and fastest to execute the bootstrapping from the ubuntu jumpbox.  However, it is also possible to execute from a local workstation (e.g. macbook) assuming that you have network connectivity over VPN to all VMs in cluster.  Note, that tools install script will only work in an Ubuntu env.
 
