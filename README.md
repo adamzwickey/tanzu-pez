@@ -19,7 +19,7 @@ It will be easiest and fastest to execute the bootstrapping from the ubuntu jump
 export VARS_YAML=vars.yaml 
 ```
 - Edit vars.yaml, providing configuration values that reflect your desired envornment.
-- Additionally, edit the values.yaml file(s) in `/cd/clusters/shared-services`, `/cd/clusters/workload1`, and `/cd/clusters/workload2` to reflect your environment.  This will drive the true GitOps worklfow.  And value that has a comment of `# This must be overridden ` does not need to be changed as this is a _Secret_ that will be read from the vars.yaml.  These changes must be checked into and pushed to your fork of the repo.
+- Additionally, edit the values.yaml file(s) in `/cd/clusters/shared-services`, `/cd/clusters/workload1`, and `/cd/clusters/workload2` to reflect your environment.  This will drive the true GitOps worklfow.  Any value that has a comment of `# This must be overridden ` does not need to be changed as this is a _Secret_ that will be read from the vars.yaml.  These changes must be checked into and pushed to your fork of the repo.
 - Prepare your jumpbox with the needed tools (kubectl w/ vsphere plugin, jq, yq, argocd cli, tmc cli, ect...) by executing the tools installation script.  Note that you'll need to enter your sudo pwd for apt-get installations.
 ```bash
 source ./scripts/install-tools.sh
@@ -28,3 +28,4 @@ source ./scripts/install-tools.sh
 ```bash
 source ./scripts/bootstrap.sh
 ```
+- Installation typically takes around 45 min, depending on the speed of your env.
