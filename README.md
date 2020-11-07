@@ -2,7 +2,7 @@
 This project is meant to automate the paving of TKG-S environments, including common extensions, in an PEZ env.  It includes TKG-S, TMC, TAC, TBS, TSM (automation soon), and TO (automation soon).  You could call this "__Tanzu In A Box__".  
 
 
-![home](https://gitlab.com/azwickey/tanzu-pez/-/raw/master/img/arch.png "arch")
+![home](https://gitlab.com/azwickey/tanzu-pez/-/raw/master/img/PEZ-Demo.png "arch")
 
 Most installations are done via and ArgoCD utilizing the [App of Apps pattern](https://argoproj.github.io/argo-cd/operator-manual/cluster-bootstrapping/)
 
