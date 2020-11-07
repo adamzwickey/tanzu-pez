@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 : ${VARS_YAML?"Need to set VARS_YAML environment variable"}
+export SUPERVISOR_VIP=$(yq r $VARS_YAML vsphere.supervisor-vip)
+export SUPERVISOR_USERNAME=$(yq r $VARS_YAML vsphere.username)
+export SUPERVISOR_PWD=$(yq r $VARS_YAML vsphere.password)
+export SHARED_SERVICES_NS=$(yq r $VARS_YAML shared-services.namespace)
+export SHARED_SERVICES_NAME=$(yq r $VARS_YAML shared-services.name)
+export WORKLOAD1_NAME=$(yq r $VARS_YAML workload1.name)
+export WORKLOAD1_NAMESPACE=$(yq r $VARS_YAML workload1.namespace)
+export WORKLOAD2_NAMESPACE=$(yq r $VARS_YAML workload2.namespace)
 
 echo "Logging into supervisor cluster..."
 expect <<EOD
