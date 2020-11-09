@@ -15,7 +15,8 @@ stringData:
       virtual_host_fqdn: "{{ .Values.grafana.ingressFQDN }}"
     monitoring:
       grafana:
-        virtual_host_fqdn: "{{ .Values.grafana.ingressFQDN }}"
+        ingress:
+          virtual_host_fqdn: "{{ .Values.grafana.ingressFQDN }}"
         image:
           repository: "registry.tkg.vmware.run/grafana"
         secret:
