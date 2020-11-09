@@ -6,6 +6,7 @@ export SUPERVISOR_PWD=$(yq r $VARS_YAML vsphere.password)
 export SHARED_SERVICES_NS=$(yq r $VARS_YAML shared-services.namespace)
 export SHARED_SERVICES_NAME=$(yq r $VARS_YAML shared-services.name)
 export WORKLOAD1_NAME=$(yq r $VARS_YAML workload1.name)
+export WORKLOAD2_NAME=$(yq r $VARS_YAML workload2.name)
 export WORKLOAD1_NAMESPACE=$(yq r $VARS_YAML workload1.namespace)
 export WORKLOAD2_NAMESPACE=$(yq r $VARS_YAML workload2.namespace)
 
