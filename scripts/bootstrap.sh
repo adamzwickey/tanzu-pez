@@ -452,3 +452,13 @@ EOD
 kp image create test --tag $HARBOR_DOMAIN/library/test-app \
     --git https://github.com/buildpacks/samples \
     --sub-path ./apps/java-maven --wait
+
+
+echo "*******************"
+echo "Boostrapping done!!"
+echo "Access ArgoCD: https://$(yq r $VARS_YAML shared-services.argo.ingress)"
+echo "Access Harbor: https://$(yq r $VARS_YAML shared-services.harbor.ingress)"
+echo "Access Kubeapps on shared services: https://$(yq r cd/clusters/shared-services/Values.yaml kubeapps.domain)"
+echo "Access Kubeapps on workload1: https://$(yq r cd/clusters/workload1/Values.yaml kubeapps.domain)"
+echo "Access Kubeapps on workload2: https://$(yq r cd/clusters/workload2/Values.yaml kubeapps.domain)"
+echo "*******************"
