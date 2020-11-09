@@ -18,6 +18,8 @@ stringData:
         image:
           repository: registry.tkg.vmware.run/prometheus
       alertmanager:
+        deployment:
+          replicas: 2
         image:
           repository: registry.tkg.vmware.run/prometheus
       kube_state_metrics:
