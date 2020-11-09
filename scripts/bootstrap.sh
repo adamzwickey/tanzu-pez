@@ -454,8 +454,8 @@ kp image create test --tag $HARBOR_DOMAIN/library/test-app \
     --sub-path ./apps/java-maven --wait
 
 
-echo "******************************************************************************************************************"
-echo "******************************************************************************************************************"
+echo "*******************"
+echo "*******************"
 echo "Boostrapping done!!"
 echo "Access ArgoCD: https://$(yq r $VARS_YAML shared-services.argo.ingress)"
 echo "Access Harbor: https://$(yq r $VARS_YAML shared-services.harbor.ingress)"
@@ -464,5 +464,5 @@ echo "Access Kubeapps on workload1: https://$(yq r cd/clusters/workload1/Values.
 echo "Access Kubeapps on workload2: https://$(yq r cd/clusters/workload2/Values.yaml kubeapps.domain)"
 echo "Apps deployed into TSM Mesh available for cluster1 at: https://*.$(yq r $VARS_YAML todos.cluster1.baseDomain)"
 echo "Apps deployed into TSM Mesh available for cluster2 at: https://*.$(yq r $VARS_YAML todos.cluster2.baseDomain)"
-echo "******************************************************************************************************************"
-echo "******************************************************************************************************************"
+echo "*******************"
+echo "*******************"
