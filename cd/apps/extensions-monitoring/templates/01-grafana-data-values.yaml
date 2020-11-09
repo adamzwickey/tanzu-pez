@@ -12,7 +12,6 @@ stringData:
     infrastructure_provider: "aws"
     ingress:
       enabled: true 
-      virtual_host_fqdn: "{{ .Values.grafana.ingressFQDN }}"
     monitoring:
       grafana:
         ingress:
