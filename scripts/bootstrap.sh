@@ -324,7 +324,7 @@ curl -X POST "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD1_NAME/apps" \
   -H "csp-auth-token: $ACCESS_TOKEN" \
   -d "{\"name\":\"Istio\",\"version\":\"Default\"}"
 #Need to annotate the ingress svc for external DNS
-sleep 10
+sleep 60
 kubectl annotate service istio-ingressgateway "external-dns.alpha.kubernetes.io/hostname=*.$(yq r $VARS_YAML todos.cluster1.baseDomain)." -n istio-system --overwrite
 
 kubectl config use-context $WORKLOAD2_NAME
@@ -346,7 +346,7 @@ curl -X POST "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD2_NAME/apps" \
   -H "csp-auth-token: $ACCESS_TOKEN" \
   -d "{\"name\":\"Istio\",\"version\":\"Default\"}"
 #Need to annotate the ingress svc for external DNS
-sleep 10
+sleep 60
 kubectl annotate service istio-ingressgateway "external-dns.alpha.kubernetes.io/hostname=*.$(yq r $VARS_YAML todos.cluster2.baseDomain)." -n istio-system --overwrite
 
 
