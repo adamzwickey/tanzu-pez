@@ -20,6 +20,7 @@ stringData:
           repository: "registry.tkg.vmware.run/grafana"
         secret:
           admin_password: "{{ .Values.grafana.pwd }}"
+          admin_user: "YWRtaW4="
       grafana_init_container:
         image:
           repository: "registry.tkg.vmware.run/grafana"
