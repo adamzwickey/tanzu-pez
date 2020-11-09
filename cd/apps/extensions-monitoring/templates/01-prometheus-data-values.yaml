@@ -9,7 +9,7 @@ stringData:
     #@data/values
     #@overlay/match-child-defaults missing_ok=True
     ---
-    infrastructure_provider: "aws"
+    infrastructure_provider: "vsphere"
     ingress:
       enabled: true
       virtual_host_fqdn: "{{ .Values.prometheus.ingressFQDN }}"
