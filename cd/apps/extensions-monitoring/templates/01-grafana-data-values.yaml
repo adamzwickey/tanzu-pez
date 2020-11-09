@@ -11,10 +11,11 @@ stringData:
     ---
     infrastructure_provider: "aws"
     ingress:
-      enabled: true
+      enabled: true 
       virtual_host_fqdn: "{{ .Values.grafana.ingressFQDN }}"
     monitoring:
       grafana:
+        virtual_host_fqdn: "{{ .Values.grafana.ingressFQDN }}"
         image:
           repository: "registry.tkg.vmware.run/grafana"
         secret:
