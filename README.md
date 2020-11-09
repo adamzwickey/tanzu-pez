@@ -46,6 +46,7 @@ source ./scripts/install-tools.sh
 -- kapp
 -- kp
 ```
+- Lastly, to install the Tanzu Build Service you must download the ([product tar from here](https://network.pivotal.io/products/build-service)) and also the ([product descriptor YAML file from here](https://network.pivotal.io/products/tbs-dependencies/)) and stage these artifacts in a directly named `temp` in the root of your cloned repo.  
 
 - When you are ready to deploy execute the install script:
 ```bash
