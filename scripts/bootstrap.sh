@@ -314,7 +314,7 @@ export CLUSTER_TOKEN=$(curl --request PUT \
 echo "Cluster Token: $CLUSTER_TOKEN"
 kubectl -n vmware-system-tsm create secret generic cluster-token --from-literal=token=$CLUSTER_TOKEN
 
-while curl -X GET "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD1_NAME" -H "accept: application/json" -H "csp-auth-token: $ACCESS_TOKEN" | jq .status.state | grep -i Connected | wc -l | grep 1 ; [ $? -ne 0 ]; do
+while curl -X GET "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD1_NAME" -H "accept: application/json" -H "csp-auth-token: $ACCESS_TOKEN" | jq .status.state | grep -Ei 'Connected|Ready' | wc -l | grep 1 ; [ $? -ne 0 ]; do
     echo Cluster $WORKLOAD1_NAME Not yet conneced with TSM Control Plane
     sleep 5s
 done
@@ -323,8 +323,10 @@ curl -X POST "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD1_NAME/apps" \
   -H "accept: application/json" -H "Content-Type: application/json" \
   -H "csp-auth-token: $ACCESS_TOKEN" \
   -d "{\"name\":\"Istio\",\"version\":\"Default\"}"
-#Need to annotate the ingress svc for external DNS
-sleep 60
+while curl -X GET "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD1_NAME" -H "accept: application/json" -H "csp-auth-token: $ACCESS_TOKEN" | jq .status.state | grep -i Ready | wc -l | grep 1 ; [ $? -ne 0 ]; do
+    echo Cluster $WORKLOAD1_NAME Istio not yet installed and ready
+    sleep 5s
+done
 kubectl annotate service istio-ingressgateway "external-dns.alpha.kubernetes.io/hostname=*.$(yq r $VARS_YAML todos.cluster1.baseDomain)." -n istio-system --overwrite
 
 kubectl config use-context $WORKLOAD2_NAME
@@ -336,7 +338,7 @@ export CLUSTER_TOKEN=$(curl --request PUT \
 echo "Cluster Token: $CLUSTER_TOKEN"
 kubectl -n vmware-system-tsm create secret generic cluster-token --from-literal=token=$CLUSTER_TOKEN
 
-while curl -X GET "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD2_NAME" -H "accept: application/json" -H "csp-auth-token: $ACCESS_TOKEN" | jq .status.state | grep -i Connected | wc -l | grep 1 ; [ $? -ne 0 ]; do
+while curl -X GET "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD2_NAME" -H "accept: application/json" -H "csp-auth-token: $ACCESS_TOKEN" | jq .status.state | grep -Ei 'Connected|Ready' | wc -l | grep 1 ; [ $? -ne 0 ]; do
     echo Cluster $WORKLOAD2_NAME Not yet conneced with TSM Control Plane
     sleep 5s
 done
@@ -345,8 +347,10 @@ curl -X POST "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD2_NAME/apps" \
   -H "accept: application/json" -H "Content-Type: application/json" \
   -H "csp-auth-token: $ACCESS_TOKEN" \
   -d "{\"name\":\"Istio\",\"version\":\"Default\"}"
-#Need to annotate the ingress svc for external DNS
-sleep 60
+while curl -X GET "https://$TSM_SERVER/tsm/v1alpha1/clusters/$WORKLOAD2_NAME" -H "accept: application/json" -H "csp-auth-token: $ACCESS_TOKEN" | jq .status.state | grep -i Ready | wc -l | grep 1 ; [ $? -ne 0 ]; do
+    echo Cluster $WORKLOAD2_NAME Istio not yet installed and ready
+    sleep 5s
+done
 kubectl annotate service istio-ingressgateway "external-dns.alpha.kubernetes.io/hostname=*.$(yq r $VARS_YAML todos.cluster2.baseDomain)." -n istio-system --overwrite
 
 
