@@ -9,11 +9,6 @@ Most installations are done via and ArgoCD utilizing the [App of Apps pattern](h
 
 ![home](https://gitlab.com/azwickey/tanzu-pez/-/raw/master/images/argo.png "argo")
 
-Most installations are done via and ArgoCD utilizing the [App of Apps pattern](https://argoproj.github.io/argo-cd/operator-manual/cluster-bootstrapping/)
-
-
-![home](https://gitlab.com/azwickey/tanzu-pez/-/raw/master/images/argo.png "argo")
-
 ## Demo Application 
 
 This environment is built to support a sample application ([see git repo here](https://gitlab.com/azwickey/todos)) that showcases Tanzu Kubernetes, Tanzu Build Service, Tanzu Application Catalog, Tanzu Observabilty, and Tanzu Sevice Mesh.  Simply put its a uService app build in [Spring Boot](http://spring.io/projects/spring-boot) using the Todo as a domain model. The **"Todo"** is well understood which makes it useful for reasoning about and comparing frameworks.  For example [**TodoMvc**](http://todomvc.com) is a resource developers can use to evaluate frontend frameworks against a concise and consistent model.
